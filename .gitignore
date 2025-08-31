@@ -1,51 +1,55 @@
-/cache
-/characters
-/css
-/extensions
-/grammars
-/installer_files
-/logs
-/loras
-/models
-/presets
-/prompts
-/repositories
-/softprompts
-/torch-dumps
-/training/datasets
+# ============================
+# Orion / TGWUI Git Ignore
+# ============================
 
-/CMD_FLAGS.txt
-/img_bot*
-/img_me*
-/models/config-user.yaml
-/notification.mp3
-/settings*.json
-/settings*.yaml
+# Python / venv
+venv*/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
 
-.chroma
-.DS_Store
-.eslintrc.js
-.idea
-.installer_state.json
-.venv
-venv
-.envrc
-.direnv
-.vs
-.vscode
-*.bak
-*.ipynb
-*.log
-*pycache*
-cert.pem
-key.pem
-package.json
-package-lock.json
-Thumbs.db
-wandb
-
-# ignore user docker config and top level links to docker files
-/docker-compose.yaml
-/docker-compose.yml
-/Dockerfile
+# Virtual environments
 .env
+.venv
+
+# TGWUI runtime artifacts
+logs/
+*.log
+cache/
+text-generation-webui.log
+
+# Models & weights (large, restoreable)
+models/
+user_data/models/
+
+# Chroma / LTM persistence (rebuildable or backed up separately)
+user_data/chroma_db/
+chroma/
+*.sqlite3
+
+# Memory seed or generated data
+*.jsonl.bak
+*.jsonl.tmp
+*.tmp
+*.bak
+
+# Checkpoints & LoRA training outputs
+checkpoints/
+lora/
+wandb/
+outputs/
+
+# Web / browser caches
+*.webp
+*.png
+*.jpg
+*.jpeg
+*.gif
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
