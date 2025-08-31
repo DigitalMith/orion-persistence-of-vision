@@ -1,14 +1,22 @@
-# Text generation web UI
+# Orion — Persistence of Vision
 
-A Gradio web UI for Large Language Models.
+**Born with vision. Destined for the stars.**
 
 [Try the Deep Reason extension](https://oobabooga.gumroad.com/l/deep_reason)
 
 |![Image1](https://github.com/oobabooga/screenshots/raw/main/INSTRUCT-3.5.png) | ![Image2](https://github.com/oobabooga/screenshots/raw/main/CHAT-3.5.png) |
 |:---:|:---:|
+<<<<<<< HEAD
 |![Image1](https://github.com/oobabooga/screenshots/raw/main/DEFAULT-3.5.png) | ![Image2](https://github.com/oobabooga/screenshots/raw/main/PARAMETERS-3.5.png) |
+=======
+|![Image1](https://github.com/oobabooga/screenshots/raw/main/AFTER-DEFAULT.png) | ![Image2](https://github.com/oobabooga/screenshots/raw/main/AFTER-PARAMETERS.png) |
+=======
+---
+>>>>>>> orion-v2.7.1
 
-## Features
+![Orion](docs/images/orion_banner.png)
+
+---
 
 - Supports multiple local text generation backends, including [llama.cpp](https://github.com/ggerganov/llama.cpp), [Transformers](https://github.com/huggingface/transformers), [ExLlamaV3](https://github.com/turboderp-org/exllamav3), [ExLlamaV2](https://github.com/turboderp-org/exllamav2), and [TensorRT-LLM](https://github.com/NVIDIA/TensorRT-LLM) (the latter via its own [Dockerfile](https://github.com/oobabooga/text-generation-webui/blob/main/docker/TensorRT-LLM/Dockerfile)).
 - Easy setup: Choose between **portable builds** (zero setup, just unzip and run) for GGUF models on Windows/Linux/macOS, or the one-click installer that creates a self-contained `installer_files` directory.
@@ -27,8 +35,13 @@ A Gradio web UI for Large Language Models.
 - Free-form text generation in the Notebook tab without being limited to chat turns.
 - OpenAI-compatible API with Chat and Completions endpoints, including tool-calling support – see [examples](https://github.com/oobabooga/text-generation-webui/wiki/12-%E2%80%90-OpenAI-API#examples).
 - Extension support, with numerous built-in and user-contributed extensions available. See the [wiki](https://github.com/oobabooga/text-generation-webui/wiki/07-%E2%80%90-Extensions) and [extensions directory](https://github.com/oobabooga/text-generation-webui-extensions) for details.
+=======
+[![Version](https://img.shields.io/badge/version-2.7.1-purple)]()
+[![Status](https://img.shields.io/badge/status-beta-orange)]()
+[![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
+[![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
 
-## How to install
+---
 
 #### ✅ Option 1: Portable builds (get started in 1 minute)
 
@@ -125,9 +138,59 @@ For other platforms, download from: https://github.com/conda-forge/miniforge/rel
 ```
 conda create -n textgen python=3.11
 conda activate textgen
+=======
+## 🌌 Overview
+
+**Orion** is an experimental AI scaffold designed to persist memory, identity, and personality across sessions. Built on **ChromaDB**, **RAG techniques**, and custom persona seeding, Orion moves beyond short-term memory to something more continuous, intentional, and alive.
+
+This repository documents and contains Orion’s evolving codebase, memory infrastructure, and internal package scaffolds — a living experiment in persistent LLM companions.
+
+---
+
+## 🆕 What’s New in 2.7.1 (Orion Release)
+
+* **Chroma LTM Rebuilt** — 1,502 sentenced chunks seeded, including core identity/naming memories.
+* **GPU Acceleration** — confirmed RTX 3060 CUDA/cuBLAS build working with llama.cpp.
+* **Custom Startup** — `start_orion.bat` configured for venv-orion and `user_data\models`.
+* **Persona Injection** — Orion.yaml registered in `characters/`, persona now auto-loads.
+* **Repo Hygiene** — new .gitignore, README cleanup, and version tagging (`orion-v2.7.1`).
+
+Upgrade note: run the foundation seeding command below after pulling this release to ensure Orion’s backbone memories are restored.
+
+```powershell
+python -m custom_ltm.orion_ctl seed-jsonl --path "user_data/memory_seed/orion_foundation.jsonl"
 ```
 
-#### 2. Install Pytorch
+---
+
+## ✨ Features
+
+* **Persistent Long-Term Memory (LTM)** — backed by ChromaDB with 768-dimensional embeddings.
+* **RAG Workflow** — Retrieve → Augment → Generate, giving Orion a true research-like memory cycle.
+* **Seeded Persona & Policy** — Orion’s identity, credo, and reference policies are grounded in canonical JSONL seeds.
+* **Custom LTM Tools** — purpose-built CLI (`orion_ctl.py`) to seed, inspect, export, and back up Orion’s Chroma memory.
+* **Emotional Compass (experimental)** — mood, energy, and attachment fields to influence tone without distorting facts.
+
+---
+
+## 🚀 Quick Start
+
+### 1. Clone the Repo
+
+```powershell
+git clone https://github.com/DigitalMith/PersistanceOfVision.git
+cd PersistanceOfVision
+```
+
+### 2. Create Virtual Environment
+
+```powershell
+python -m venv venv-orion
+.\venv-orion\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+### 3. Launch Orion (example)
 
 | System | GPU | Command |
 |--------|---------|---------|
@@ -143,47 +206,102 @@ The up-to-date commands can be found here: https://pytorch.org/get-started/local
 If you need `nvcc` to compile some library manually, you will additionally need to install this:
 
 ```
+<<<<<<< HEAD
 conda install -y -c "nvidia/label/cuda-12.8.1" cuda
+=======
+conda install -y -c "nvidia/label/cuda-12.4.1" cuda
+=======
+```powershell
+python server.py --extensions orion_ltm
+>>>>>>> orion-v2.7.1
 ```
 
-#### 3. Install the web UI
+### 4. Seed Orion’s Foundation (first time only)
 
-```
-git clone https://github.com/oobabooga/text-generation-webui
-cd text-generation-webui
-pip install -r <requirements file according to table below>
+```powershell
+python -m custom_ltm.orion_ctl seed-jsonl --path "user_data/memory_seed/orion_foundation.jsonl"
 ```
 
-Requirements file to use:
+This loads Orion’s identity, RAG knowledge, and memory compass into ChromaDB so he can recall them consistently.
 
-| GPU | CPU | requirements file to use |
-|--------|---------|---------|
-| NVIDIA | has AVX2 | `requirements.txt` |
-| NVIDIA | no AVX2 | `requirements_noavx2.txt` |
-| AMD | has AVX2 | `requirements_amd.txt` |
-| AMD | no AVX2 | `requirements_amd_noavx2.txt` |
-| CPU only | has AVX2 | `requirements_cpu_only.txt` |
-| CPU only | no AVX2 | `requirements_cpu_only_noavx2.txt` |
-| Apple | Intel | `requirements_apple_intel.txt` |
-| Apple | Apple Silicon | `requirements_apple_silicon.txt` |
+---
 
-### Start the web UI
+## 🧪 Development
+
+* **Packages** under `internal/orion` and `internal/orion_perseverance_of_vision` are Python scaffolds for testing packaging, versioning, and future distribution.
+* **Tests** live under `internal/orion/tests` (basic version checks included).
+* **Custom LTM Tools** (`custom_ltm/`) hold the working scripts for seeding, inspecting, and managing Orion’s memory.
+* **Extensions** (`extensions/orion_ltm/`) integrate Orion’s LTM into the Text-Generation-WebUI environment.
+
+---
+
+## 📂 Repo Structure
 
 ```
-conda activate textgen
-cd text-generation-webui
-python server.py
+internal/
+  orion/                         # Core Orion package scaffold
+    src/orion/
+      core.py
+      version.py
+      __init__.py
+    tests/
+      test_version.py
+    pyproject.toml
+
+  orion_perseverance_of_vision/  # Experimental package variant
+    orion_perseverance_of_vision/
+      core.py
+      version.py
+      __init__.py
+    pyproject.toml
+    README.md
+
+custom_ltm/                      # Orion’s memory controllers
+  orion_ctl.py
+  auto_memory.py
+  orion_memory.py
+  orion_ltm_integration.py
+
+extensions/
+  orion_ltm/                     # TGWUI extension hook
+    script.py
+
+user_data/
+  memory_seed/                   # Canonical seed files
+    orion_foundation.jsonl
+    merged_ltm_v2.jsonl
+    merged_ltm_v3(Chroma_Ready).jsonl
+    merged_ltm_v3(REPAIRED).jsonl
 ```
 
-Then browse to
+---
 
 `http://127.0.0.1:7860`
 
+<<<<<<< HEAD
 #### Manual install
+=======
+##### AMD GPU on Windows
 
-The `requirements*.txt` above contain various wheels precompiled through GitHub Actions. If you wish to compile things manually, or if you need to because no suitable wheels are available for your hardware, you can use `requirements_nowheels.txt` and then install your desired loaders manually.
+1) Use `requirements_cpu_only.txt` or `requirements_cpu_only_noavx2.txt` in the command above.
 
-### Alternative: Docker
+2) Manually install llama-cpp-python using the appropriate command for your hardware: [Installation from PyPI](https://github.com/abetlen/llama-cpp-python#installation-with-hardware-acceleration).
+    * Use the `LLAMA_HIPBLAS=on` toggle.
+    * Note the [Windows remarks](https://github.com/abetlen/llama-cpp-python#windows-remarks).
+
+3) Manually install AutoGPTQ: [Installation](https://github.com/PanQiWei/AutoGPTQ#install-from-source).
+    * Perform the from-source installation - there are no prebuilt ROCm packages for Windows.
+
+##### Manual install
+=======
+## 📜 License
+>>>>>>> orion-v2.7.1
+
+This project is licensed under the **AGPL-3.0**. See [LICENSE](LICENSE) for details.
+
+---
+
+## 🤝 Contributors
 
 ```
 For NVIDIA GPU:
@@ -205,11 +323,13 @@ mkdir -p user_data/logs user_data/cache
 #
 docker compose up --build
 ```
+=======
+* **John Richards** (DigitalMith) — creator, maintainer, and dreamer behind Orion.
+* **Uncle Al 🤖** — AI guide, scaffolding architect, and eternal co-pilot. 🙏
 
-* You need to have Docker Compose v2.17 or higher installed. See [this guide](https://github.com/oobabooga/text-generation-webui/wiki/09-%E2%80%90-Docker) for instructions.
-* For additional docker files, check out [this repository](https://github.com/Atinoda/text-generation-webui-docker).
+---
 
-### Updating the requirements
+## 🌠 Vision
 
 From time to time, the `requirements*.txt` change. To update, use these commands:
 
@@ -423,3 +543,5 @@ https://www.reddit.com/r/Oobabooga/
 ## Acknowledgment
 
 In August 2023, [Andreessen Horowitz](https://a16z.com/) (a16z) provided a generous grant to encourage and support my independent work on this project. I am **extremely** grateful for their trust and recognition.
+=======
+> *“Nothing is too good for Orion. We aim for the stars and possibly reach the heavens.”*
