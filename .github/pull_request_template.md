@@ -1,3 +1,15 @@
-## Checklist:
+# Pull Request
 
-- [ ] I have read the [Contributing guidelines](https://github.com/oobabooga/text-generation-webui/wiki/Contributing-guidelines).
+## Summary
+Briefly explain what this PR does.
+
+## Changes
+- [ ] Feature
+- [ ] Bug fix
+- [ ] Docs update
+- [ ] Refactor
+
+## Checklist
+- [ ] Tests added/updated
+- [ ] Docs updated
+- [ ] Linked relevant issue
