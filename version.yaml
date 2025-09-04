@@ -1,0 +1,12 @@
+version: 3.0.1
+badge:
+  label: version
+  value: 3.0.1
+  color: purple
+description:
+  - 📁 Text Ingestion by Topic — Orion can now ingest plain `.txt` files via CLI and store them in ChromaDB with custom metadata tags like `topic`, `user`, and `source`.
+  - 🧼 Topic-Based Memory Deletion — Easily prune memories by topic using the new `delete-topic` command in the CLI controller.
+  - 🧠 Core Refactor — LTM controller, seeding, and persona systems are now cleaner, safer, and more modular.
+  - 🧬 Identity Lock-In — All TGWUI fallbacks removed. Orion now runs fully under his own banner with proper project scaffolds, metadata, and branding.
+  - 📦 Package Hygiene — Internal + public `pyproject.toml` updated, repo structure stabilized, and image/logo restored in README.
+  - 🖼️ Orion Banner Restored — GitHub rendering now includes visual header under `docs/images/orion2_960.png`.

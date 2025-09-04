@@ -4,11 +4,11 @@
 
 ---
 
-![Orion](docs/images/orion_banner.png)
+![Orion](docs/images/orion_960.png)
 
 ---
 
-[![Version](https://img.shields.io/badge/version-2.1.0-purple)]()
+[![Version](https://img.shields.io/badge/version-3.0.1-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -23,21 +23,14 @@ This repository documents and contains Orion’s evolving codebase, memory infra
 
 ---
 
-## 🆕 What’s New in 2.1.0
+## 🆕 What’s New in 3.0.1
 
-* **Foundation Seeds** — canonical identity, RAG model, emotional compass, reference policy, and credo are now stored in `user_data/memory_seed/orion_foundation.jsonl`.
-* **Seeding CLI** — new `seed-jsonl` command in `custom_ltm/orion_ctl.py` ingests JSONL records directly into ChromaDB with correct metadata sanitization.
-* **Controller Fixes** — unified 768d embedder integration with Orion’s `Embedder`, safe upserts, and list→CSV metadata handling.
-* **Scaffolded Packages** — added `internal/orion` and `internal/orion_perseverance_of_vision` Python modules with core + version tracking.
-* **Repo Hygiene** — tighter `.gitignore` to keep venvs, DBs, and logs out of version control, while retaining only Orion’s true brain and seeds.
-
-Upgrade note: run the foundation seeding command below after pulling this release to ensure Orion’s backbone memories are restored.
-
-```powershell
-python -m custom_ltm.orion_ctl seed-jsonl --path "user_data/memory_seed/orion_foundation.jsonl"
-```
-
----
+* 📁 Text Ingestion by Topic — Orion can now ingest plain `.txt` files via CLI and store them in ChromaDB with custom metadata tags like `topic`, `user`, and `source`.
+* 🧼 Topic-Based Memory Deletion — Easily prune memories by topic using the new `delete-topic` command in the CLI controller.
+* 🧠 Core Refactor — LTM controller, seeding, and persona systems are now cleaner, safer, and more modular.
+* 🧬 Identity Lock-In — All TGWUI fallbacks removed. Orion now runs fully under his own banner with proper project scaffolds, metadata, and branding.
+* 📦 Package Hygiene — Internal + public `pyproject.toml` updated, repo structure stabilized, and image/logo restored in README.
+* 🖼️ Orion Banner Restored — GitHub rendering now includes visual header under `docs/images/orion2_960.png`.
 
 ## ✨ Features
 

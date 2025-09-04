@@ -1,6 +1,6 @@
 [project]
 name = "orion"
-version = "2.9.0"
+version = "3.0.1"
 description = "Orion: Persistence of Vision – Internal Dev Module"
 authors = [{ name = "DigitalMith", email = "jrichards00@proton.me" }]
 readme = "README.md"
