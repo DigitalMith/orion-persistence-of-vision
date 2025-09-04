@@ -1,0 +1,10 @@
+Metadata-Version: 2.4
+Name: orion-perseverance-of-vision
+Version: 0.0.1
+Summary: Orion — Perseverance of Vision: local-first LLM helpers for TGWUI.
+Author: You
+License: AGPL-3.0
+Requires-Python: >=3.11
+Description-Content-Type: text/markdown
+
+Orion — Perseverance of Vision (internal package)

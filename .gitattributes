@@ -1,0 +1,25 @@
+# Auto normalize text files
+* text=auto
+
+# Force LF for source code and Unix scripts
+*.py     text eol=lf
+*.sh     text eol=lf
+*.yml    text eol=lf
+*.yaml   text eol=lf
+*.toml   text eol=lf
+*.md     text eol=lf
+
+# Force CRLF for Windows batch scripts
+*.bat    text eol=crlf
+*.cmd    text eol=crlf
+
+# Treat binary files properly
+*.png    binary
+*.jpg    binary
+*.jpeg   binary
+*.gif    binary
+*.ico    binary
+*.pdf    binary
+*.ttf    binary
+*.woff   binary
+*.woff2  binary

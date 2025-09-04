@@ -1,63 +1,55 @@
-<<<<<<< HEAD
-/css
-/extensions
-/installer_files
-/repositories
-/user_data
-=======
-# ============================
-# Orion / TGWUI Git Ignore
-# ============================
-
-# Python / venv
-venv*/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
-*.egg-info/
->>>>>>> orion-v2.7.1
-
-# Virtual environments
-.env
-.venv
-
-# TGWUI runtime artifacts
-logs/
-*.log
-cache/
-text-generation-webui.log
-
-# Models & weights (large, restoreable)
-models/
-user_data/models/
-
-# Chroma / LTM persistence (rebuildable or backed up separately)
-user_data/chroma_db/
-chroma/
+# Ignore databases, models, large artifacts
 *.sqlite3
+*.bin
+*.pt
+*.pkl
+*.tar.gz
+*.whl
+*.gguf
+*.safetensors
+*.7z
+*.zip
+*.cache/
 
-# Memory seed or generated data
-*.jsonl.bak
-*.jsonl.tmp
-*.tmp
-*.bak
+# Ignore build & installer artifacts
+*.exe
+*.dll
+*.pyd
+.installer_state.json
+installer_files/
+installer_files\env/
+installer_files\conda/
 
-# Checkpoints & LoRA training outputs
-checkpoints/
-lora/
-wandb/
-outputs/
-
-# Web / browser caches
-*.webp
+# Ignore images & logs
 *.png
 *.jpg
 *.jpeg
 *.gif
+*.log
+*.tmp
 
-# OS / editor junk
-.DS_Store
-Thumbs.db
+# Ignore Python cache
+__pycache__/
+*.pyc
+
+# Ignore editor/OS files
 .vscode/
 .idea/
+.DS_Store
+Thumbs.db
+
+# Ignore venv
+venv/
+venv-orion/
+
+# Ignore data outputs but **allow seed configs**
+user_data/*
+!user_data/memory_seed/
+!user_data/memory_seed/*.jsonl
+
+# Ignore extensions generally but **allow Orion**
+extensions/*
+!extensions/orion_ltm/
+
+# Ignore LTM backups
+backups/ltm/
