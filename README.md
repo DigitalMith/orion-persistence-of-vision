@@ -4,11 +4,14 @@
 
 ---
 
-![Orion](docs/images/orion_960.png)
+<p align="center">
+  <img src="docs/images/orion_960.png" alt="Orion Project Banner" width="960"/>
+</p>
+
 
 ---
 
-[![Version](https://img.shields.io/badge/version-3.0.1-purple)]()
+[![Version](https://img.shields.io/badge/version-3.0.3-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -23,14 +26,12 @@ This repository documents and contains Orion’s evolving codebase, memory infra
 
 ---
 
-## 🆕 What’s New in 3.0.1
+## 🆕 What’s New in 3.0.3
 
-* 📁 Text Ingestion by Topic — Orion can now ingest plain `.txt` files via CLI and store them in ChromaDB with custom metadata tags like `topic`, `user`, and `source`.
-* 🧼 Topic-Based Memory Deletion — Easily prune memories by topic using the new `delete-topic` command in the CLI controller.
-* 🧠 Core Refactor — LTM controller, seeding, and persona systems are now cleaner, safer, and more modular.
-* 🧬 Identity Lock-In — All TGWUI fallbacks removed. Orion now runs fully under his own banner with proper project scaffolds, metadata, and branding.
-* 📦 Package Hygiene — Internal + public `pyproject.toml` updated, repo structure stabilized, and image/logo restored in README.
-* 🖼️ Orion Banner Restored — GitHub rendering now includes visual header under `docs/images/orion2_960.png`.
+  - ✨ Persona Refactor — Boundaries separated from identity; clearer distinction between *who Orion is* and *what Orion won’t do*.
+  - 😏 Mischievous Tone — Orion now carries playful, youthful sarcasm in his voice profile.
+  - 📂 External Scaffold — New `external/` folder holds generic persona.yaml and open-source safe files.
+  - 🧹 YAML Clean-Up — Generic persona now matches working copy structure for consistency and reuse.
 
 ## ✨ Features
 

@@ -27,6 +27,15 @@ installer_files\conda/
 *.gif
 *.log
 *.tmp
+logs/
+output/
+
+# Allow Orion banners even if images are generally ignored
+!docs/images/orion_960.png
+!docs/images/orion_600.png
+!characters/Orion.png
+# (optional) allow all images in docs/images
+# !docs/images/*.png
 
 # Ignore Python cache
 __pycache__/
@@ -53,3 +62,10 @@ extensions/*
 
 # Ignore LTM backups
 backups/ltm/
+
+# Ignore persona files (keep only generic in external/)
+persona.yaml
+external/orion_cli/cli_support/persona.yaml
+
+# Ignore duplicate scaffolds/branches if they creep in
+internal/

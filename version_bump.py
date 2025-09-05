@@ -1,6 +1,34 @@
 import re
 import yaml
 from pathlib import Path
+import shutil
+
+# Paths
+source_version_file = "version.py"
+copy_targets = [
+    "internal/orion/src/version.py",
+    "internal/orion_perseverance_of_vision/version.py",
+]
+source_changelog_file = "CHANGELOG.md"
+copy_targets = [
+    "internal/orion/src/CHANGELOG.md",
+    "internal/orion_perseverance_of_vision/CHANGELOG.md",
+]
+source_readme_file = "README.md"
+copy_targets = [
+    "internal/orion/src/README.md",
+    "internal/orion_perseverance_of_vision/README.md",
+]
+
+
+# Copy the updated version.py to internal paths
+for target in copy_targets:
+    try:
+        shutil.copy(source_version_file, target)
+        print(f"[OK] Copied version.py to → {target}")
+    except Exception as e:
+        print(f"[ERROR] Failed to copy to {target}: {e}")
+
 
 ROOT = Path(__file__).parent
 
@@ -24,6 +52,12 @@ README_FILES = [
     ROOT / "README.md",
     ROOT / "internal" / "orion" / "README.md",
     ROOT / "internal" / "orion_perseverance_of_vision" / "README.md",
+]
+
+CHANGELOG_FILES = [
+    ROOT / "CHANGELOG.md",
+    ROOT / "internal" / "orion" / "CHANGELOG.md",
+    ROOT / "internal" / "orion_perseverance_of_vision" / "CHANGELOG.md",
 ]
 
 # === Helpers ================================================================
@@ -140,6 +174,35 @@ def update_readme(file_path: Path, version: str, badge: dict, description_lines:
     file_path.write_text(readme, encoding="utf-8")
     print(f"✔️ Updated README.md → {file_path}")
 
+def update_changelog(file_path: Path, version: str, sections: dict[str, list[str]]):
+    if not file_path.exists():
+        print(f"⚠️  Skipping (missing): {file_path}")
+        return
+
+    text = clean(file_path.read_text(encoding="utf-8"))
+
+    changelog_entry = [f"## [{version}]"]
+    for header, lines in sections.items():
+        if lines:
+            changelog_entry.append(f"\n### {header}")
+            changelog_entry.extend(f"* {line}" for line in lines)
+
+    changelog_block = "\n".join(changelog_entry) + "\n\n---\n\n"
+
+    # Inject after <!--CHANGELOG_START-->
+    if "<!--CHANGELOG_START-->" in text:
+        text = re.sub(
+            r"(<!--CHANGELOG_START-->\n)",
+            r"\1" + changelog_block,
+            text,
+            count=1
+        )
+    else:
+        text = changelog_block + text
+
+    file_path.write_text(text, encoding="utf-8")
+    print(f"✔️ Updated CHANGELOG.md → {file_path}")
+
 # === Main ===================================================================
 
 def main():
@@ -147,6 +210,15 @@ def main():
     version = data["version"]
     badge = data.get("badge", {"label": "version", "value": version, "color": "purple"})
     description = data.get("description", [])
+    whats_new = data.get("whats_new", [])
+    improvements = data.get("improvements", [])
+    fixes = data.get("fixes", [])
+    
+    sections = {
+        "What's New": whats_new,
+        "Improvements": improvements,
+        "Fixes": fixes,
+    }
 
     for p in VERSION_FILES:
         update_version_py(p, version)
@@ -156,6 +228,9 @@ def main():
 
     for p in README_FILES:
         update_readme(p, version, badge, description)
+        
+    for p in CHANGELOG_FILES:
+        update_changelog(p, version, sections)  # Function to be created
 
     print(f"\n🎉 Bump complete → v{version}")
 
