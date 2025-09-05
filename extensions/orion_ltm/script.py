@@ -15,9 +15,6 @@ ORION_CLI_ROOT = Path(__file__).resolve().parents[1] / "orion_cli"
 if str(ORION_CLI_ROOT) not in sys.path:
     sys.path.insert(0, str(ORION_CLI_ROOT))
 
-# Import helper from orion_cli
-from cli_helpers.utils import load_yaml_sections
-
 # Optional custom LTM logic path (used later in this script?)
 ROOT = Path(__file__).resolve().parents[1]
 CUSTOM_LTM = ROOT / "custom_ltm"
