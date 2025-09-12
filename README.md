@@ -11,7 +11,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-3.0.3-purple)]()
+[![Version](https://img.shields.io/badge/version-3.1.0-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -26,12 +26,12 @@ This repository documents and contains Orion’s evolving codebase, memory infra
 
 ---
 
-## 🆕 What’s New in 3.0.3
+## 🆕 What’s New in 3.1.0
 
-  - ✨ Persona Refactor — Boundaries separated from identity; clearer distinction between *who Orion is* and *what Orion won’t do*.
-  - 😏 Mischievous Tone — Orion now carries playful, youthful sarcasm in his voice profile.
-  - 📂 External Scaffold — New `external/` folder holds generic persona.yaml and open-source safe files.
-  - 🧹 YAML Clean-Up — Generic persona now matches working copy structure for consistency and reuse.
+  - 🕒 **Timestamps in Episodic Memory** — every user and assistant turn now includes ISO-formatted timestamps for temporal recall.
+  - 📊 **Importance Scoring** — each memory sentence is tagged with an automatically computed importance level; assistant turns receive a mild relevance boost.
+  - 🧠 **Richer Retrieval** — ChromaDB queries now prioritize important, recent memories, giving Orion a more grounded and context-aware voice.
+  - 🔧 **Extension Stabilization** — `orion_ltm` refactored for consistent sys.path handling and CLI integration (no more `custom_ltm` confusion).
 
 ## ✨ Features
 
@@ -69,10 +69,36 @@ python server.py --extensions orion_ltm
 ### 4. Seed Orion’s Foundation (first time only)
 
 ```powershell
-python -m custom_ltm.orion_ctl seed-jsonl --path "user_data/memory_seed/orion_foundation.jsonl"
+python -m cli.scripts.ltm_restore_jsonl --jsonl user_data/memory_seed/orion_foundation.jsonl
 ```
 
 This loads Orion’s identity, RAG knowledge, and memory compass into ChromaDB so he can recall them consistently.
+
+---
+
+### 🛠️ One-Time Setup Script (Windows Only)
+
+For easier first-time installation, Orion includes a helper script to configure environment variables and paths automatically:
+
+```
+setup_orion.bat
+```
+
+This script will:
+
+- Create the virtual environment (venv-orion) if not already present.
+- Install dependencies from requirements.txt.
+- Pre-download the all-MiniLM-L6-v2 embedding model used by Orion LTM, so no internet access is required at runtime.
+- Set the following environment variables:
+  - ORION_CHROMA_DB → C:\Orion\text-generation-webui\user_data\chroma_db
+  - ORION_PERSONA_COLLECTION → orion_persona
+  - ORION_LTM_COLLECTION → orion_episodic_sent_ltm
+
+ℹ️ You may need to restart your terminal or system for the environment variables to take effect.
+
+> Run this script **as Administrator** if you want the changes to persist system-wide.
+
+You’ll find the script in the root of the repository after cloning. If you ever reset your environment or re-clone the repo, just run `setup_orion.bat` again.
 
 ---
 
