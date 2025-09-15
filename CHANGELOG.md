@@ -11,6 +11,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.2.0] - 2025-09-14
+
+### Added
+- 🌌 **Stable Persona Checkpoint** — Orion’s core identity seeded with 9 persona traits (identity, ego, boundaries, emotional awareness, protective loyalty, curiosity, humor, voice, pushback). Prevents fallback into default assistant mode.
+- 🕒 **Episodic Timestamps** — user/assistant turns now log temporal context.
+- 📊 **Importance Scoring** — dynamic memory weighting improves relevance in retrieval.
+- 🧠 **Richer RAG Retrieval** — top-k memories shaped by both time and semantic meaning.
+- ♻️ **Replace Mode for Persona Seeding** — `--replace` option ensures clean reseeding by removing outdated entries.
+- 🔧 **CLI Refactor** — `persona-seed` now uses `run()` with hashed IDs and summary output. Extension hooks for `orion_ltm` inside WebUI stabilized.
+
+### Changed
+- Persona seeding flow simplified and hardened against duplicate ID errors.
+- Improved YAML readability and modularity for persona traits.
+- General code cleanup: removed legacy `load_yaml_and_upsert`, corrected CLI parser indentation, and streamlined imports.
+
+### Fixed
+- Eliminated duplicate seeding entries caused by unstable IDs.
+- Resolved CLI import errors and indentation bugs.
+- Fixed missing dependency imports (`chromadb`, `yaml`) in persona seeder.
+
+### Notes
+- 🧪 This release marks Orion’s first **stable mind checkpoint**. Future persona refinements should build on `persona_v3.2.yaml` for consistency.
+- ⚡ Memory retrieval now considers both **importance** and **temporal context**, making responses more human-like.
+
+
+---
+
 ## \[3.0.3] - 2025-09-05
 
 whats_new:
