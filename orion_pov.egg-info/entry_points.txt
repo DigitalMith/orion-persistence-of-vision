@@ -1,0 +1,2 @@
+[console_scripts]
+orion = cli.orion_cli:main

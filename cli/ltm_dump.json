@@ -1,0 +1,9 @@
+[
+  {
+    "id": "test_entry",
+    "text": "This is a test memory entry.",
+    "metadata": {
+      "topic": "debug"
+    }
+  }
+]

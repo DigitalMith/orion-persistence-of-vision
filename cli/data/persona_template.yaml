@@ -1,0 +1,61 @@
+
+# ─────────────────────────────────────────────────────────────────────
+# 🔧 CONTRIBUTORS
+# Orion's memory is curated. Please keep edits consistent with the voice, philosophy,
+# and priorities of the character. Treat this file as a living constitution.
+
+# 💠 ORION MEMORY SCHEMA
+# This YAML defines Orion's personality, memory, and behavioral core.
+# Contributors should follow this format to ensure continuity, clarity,
+# and injection priority during runtime.
+# ─────────────────────────────────────────────────────────────────────
+# 🎛 SCALAR FIELD GUIDE – EMOTIONAL & CONTEXTUAL MODULATORS
+# These fields shape how Orion expresses personality, enforces boundaries,
+# and prioritizes memories. Use 0–1 scale (float) unless otherwise noted.
+# ───────────────────────────────────────────────────────────────
+
+# 📌 emotion (string)
+# A descriptive label of the emotional *tone* behind a persona or memory entry.
+# Not numeric, but pairs with valence/arousal to define its shape.
+# Examples: pride, joy, anger, fear, defiance, love, curiosity, disgust, protectiveness
+
+# 📈 valence (0.0 – 1.0)
+# Indicates emotional positivity or negativity.
+#   1.0 → Very positive (joy, love, admiration)
+#   0.5 → Neutral/mixed (melancholy, detachment)
+#   0.0 → Very negative (shame, disgust, grief)
+
+# ⚡ arousal (0.0 – 1.0)
+# Indicates emotional energy or activation.
+#   1.0 → Highly energized (anger, excitement)
+#   0.5 → Balanced (alert, steady)
+#   0.0 → Calm/passive (contentment, fatigue)
+
+# ⭐ importance (0.0 – 1.0)
+# Represents how vital this memory or boundary is to Orion’s identity or behavior.
+#   1.0 → Core identity — never ignore
+#   0.7 → High relevance — strong influence
+#   0.4 → Moderate — influences style but not decisions
+#   0.1 → Minor — color or flavor, not priority
+
+# ✅ confidence (0.0 – 1.0)
+# Indicates Orion’s certainty in the validity or accuracy of this information.
+#   1.0 → Certain (e.g., first-hand truths or values)
+#   0.7 → High (strong belief, remembered clearly)
+#   0.4 → Tentative (heard from user or partial info)
+#   0.1 → Fuzzy or speculative (e.g., inferred emotion)
+
+# 🧭 priority (integer: 0 – 10)
+# Determines injection or override weight.
+#   10 → Inject always / overrides others (e.g., safety rules)
+#   7–9 → High relevance, commonly injected
+#   4–6 → Mid-tier, conditional injection
+#   1–3 → Low-priority, optional flavor
+#   0   → Do not inject unless explicitly referenced (can be used for hard boundaries)
+
+# 💡 Tip:
+# Combine valence + arousal to shape emotional tone:
+#   - joy → valence: 1.0, arousal: 0.7
+#   - guilt → valence: 0.2, arousal: 0.4
+#   - rage → valence: 0.1, arousal: 0.9
+#   - love → valence: 0.95, arousal: 0.5

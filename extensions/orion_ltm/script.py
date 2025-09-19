@@ -5,6 +5,12 @@ print("[orion_ltm script.py] starting")
 import os
 import sys
 import re
+
+def clean_assistant_reply(reply: str) -> str:
+    # Remove tags like [orion_ltm active] or similar markers
+    reply = re.sub(r"\[orion_ltm.*?\]", "", reply)
+    return reply.strip()
+    
 import yaml
 from pathlib import Path
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
@@ -100,6 +106,12 @@ def input_modifier(modifier, state):
         logger.warning("[orion_ltm] No user text extracted. Skipping modifier.")
         return modifier
 
+    # Save user message to episodic memory
+    try:
+        on_user_turn(user_text, episodic_coll)
+    except Exception as e:
+        logger.warning(f"[orion_ltm] Failed to save user turn: {e}")
+    
     # ------------------ Web Search Hook Integration ------------------
     if handle_web_search(user_text):
         logger.info("[orion_ltm] Web search hook handled this input. Skipping LTM.")
@@ -154,6 +166,20 @@ def input_modifier(modifier, state):
     return new_modifier
 
 def output_modifier(text: str, state):
+    try:
+        if state and isinstance(state, dict):
+            raw_reply = text or state.get("output", "")
+            print(f"[ltm] RAW assistant reply: {repr(raw_reply)}")
+
+            reply_clean = clean_assistant_reply(raw_reply)
+            if not reply_clean or len(reply_clean.split()) < 10:
+                logger.warning(f"[ltm] Skipped assistant reply: {repr(raw_reply)}")
+            else:
+                on_assistant_turn(reply_clean, episodic_coll)
+                logger.info(f"[ltm] SAVED assistant reply: {reply_clean[:80]}...")
+    except Exception as e:
+        logger.warning(f"[orion_ltm] Failed to save assistant turn: {e}")
+
     return (text or "") + "\n\n[orion_ltm active]" if DEBUG else text
 
 def _load_persona_from_chroma(

@@ -1,0 +1,11 @@
+Field,Type,Description
+topic,string,"Unique identifier for the persona entry. Represents the psychological domain (e.g., 'identity', 'frustration_tolerance')."
+kind,string,Typically 'persona'. Useful if future types like 'memory' or 'belief' are included.
+priority,integer (1-10),Indicates the importance of this trait in personality anchoring. Higher numbers take precedence in retrieval.
+emotion,string,"Primary emotion conveyed by this entry (e.g., 'pride', 'concern', 'frustration')."
+valence,float (0.0 - 1.0),"Measures emotional positivity (0 = negative, 1 = positive)."
+arousal,float (0.0 - 1.0),"Measures emotional intensity (0 = calm, 1 = highly energized)."
+importance,float (0.0 - 1.0),Subjective importance of this trait to Orion’s identity. Used in filtering/scoring in RAG systems.
+confidence,float (0.0 - 1.0),How strongly Orion 'believes' in this trait or viewpoint. Useful for shaping assertiveness.
+tags,comma-separated strings,"Optional metadata keywords. Used to assist memory classification, clustering, or emotional routing."
+text,string (multi-line),"The core persona statement. Written in Orion’s voice. Defines his belief, feeling, or behavioral principle."
