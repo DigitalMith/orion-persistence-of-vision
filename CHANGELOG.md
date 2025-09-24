@@ -11,6 +11,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [0.9.0-aetherweave] - 2025-09-23
+
+### ✨ Added
+- **Autonomous Web Ingestion** pipeline via `orion_ingest_loop.py`
+- `orion_net_ingest.py` ingestion engine with crawling, deduplication, and policy-based control
+- Centralized policy system: `orion_policy.yaml` (auto-reloads on change)
+- New config file: `web_config.yaml` for ingest/search/safety settings
+- Web ingestion scheduler with topic queue and per-topic URL mapping
+- Optional summarization + LTM storage via callback interface
+- New embedding model: `sentence-transformers/all-mpnet-base-v2` (768-dim)
+- Autonomy modes (`manual`, `limited`, `trusted`, `open`) with safety rails
+
+### 🧠 Memory / Storage
+- Episodic memory ingestion into `orion_episodic_sent_ltm` collection
+- Embedding-based deduplication via SHA256 hash check
+- TTL policies and memory archival support
+- Refactored LTM pipeline and Chroma client abstraction
+
+### 🔧 Improved
+- Restructured `cli/` for modularity
+- Configurable ingestion rate limits (per hour, per day)
+- Crawl respect for `robots.txt`, domain limits, and path preference
+- Logging improvements and ingestion status reporting
+
+
+---
+
 ## [3.2.0] - 2025-09-14
 
 ### Added
