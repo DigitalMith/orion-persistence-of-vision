@@ -49,7 +49,7 @@ Thumbs.db
 
 # Ignore venv
 venv/
-venv-orion/
+venv*/
 
 # Ignore data outputs but **allow seed configs**
 user_data/*
