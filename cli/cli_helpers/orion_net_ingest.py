@@ -1,4 +1,6 @@
 from __future__ import annotations
+from cli.cli_helpers.ltm_helpers import embed_and_store  # adjust path as needed
+from datetime import datetime
 
 import os, re, time, json, queue, hashlib, logging, urllib.parse
 from dataclasses import dataclass
@@ -41,6 +43,9 @@ class Toggles:
     store_web_to_ltm: bool = True
     allow_pdfs: bool = False
     quarantine_mode: bool = False
+    auto_discover_links: bool = True         # <- NEW
+    obey_soft_denylist: bool = True          # <- NEW
+    max_embeds_per_run: int = 500            # <- NEW
 
 @dataclass
 class Policy:
@@ -252,7 +257,7 @@ class OrionNetIngest:
 
             if depth < max_depth:
                 for link in self._extract_links(html, base=url_i, same_path_pref=same_path_pref, seed=seed_url, policy=policy):
-                    if link not in visited and link not in enqueued and self._url_allowed(link, policy, seed_url):
+                    if self._should_visit(link, policy, visited, enqueued, seed_url):
                         q.put((link, depth + 1))
                         enqueued.add(link)
 
@@ -274,6 +279,24 @@ class OrionNetIngest:
         for pat in DENYLIST_HARD:
             if re.fullmatch(pat, url):
                 return False
+        return True
+
+    def _should_visit(self, url: str, policy: Policy, visited: set, enqueued: set, seed_url: str = "") -> bool:
+        if url in visited or url in enqueued:
+            return False
+
+        # Check hard denylist
+        if not self._url_allowed(url, policy, seed_url):
+            return False
+
+        # Check soft denylist
+        if getattr(policy.toggles, "obey_soft_denylist", False):
+            for pattern in policy.quarantine.get("denylist", []):
+                if re.match(pattern, url):
+                    return False
+
+        # You can add more checks here later (e.g., domain rules)
+        return True   
 
         src = policy.sources or {}
         deny = src.get("denylist", []) or []
@@ -357,20 +380,37 @@ class OrionNetIngest:
         text = re.sub(r"\+?\d[\d\s().-]{6,}\d", "[redacted-phone]", text)
         return text
 
-def orion_store_callback_factory(orion_mem_obj):
-    """Return a callback(summary, topic) -> None that stores into OrionMemory with tags."""
-    def _store(summary: dict, topic: str) -> None:
-        content = json.dumps(
-            {k: summary.get(k) for k in ("facts", "claims", "quotes", "date", "source", "why_saved", "hash")},
-            ensure_ascii=False,
-        )
-        tags = ["web", topic]
-        orion_mem_obj.add(content, layer="semantic", tags=tags)
-    return _store
+# cli_helpers/orion_net_ingest.py
+def orion_store_callback_factory():
+    def store(text: str, metadata: dict, role: str = "user"):
+        try:
+            embed_and_store(text, metadata=metadata, role=role, collection_name="orion_episodic_sent_ltm")
+        except Exception as e:
+            print(f"[store callback error] Failed to store: {e}")
+    return store
 
+# if __name__ == "__main__":
+    # policy_file = os.environ.get("ORION_POLICY", r"C:\Orion\text-generation-webui\orion_policy.yaml")
+    # ing = OrionNetIngest(policy_file)
+    # res = ing.ingest_web("https://www.wikipedia.org/", topic="test", crawl_depth=1, crawl_pages_cap=5)
+    # print(res)
 
 if __name__ == "__main__":
+    # Set path to your policy YAML
     policy_file = os.environ.get("ORION_POLICY", r"C:\Orion\text-generation-webui\orion_policy.yaml")
+
+    # Create ingestion engine and callback
     ing = OrionNetIngest(policy_file)
-    res = ing.ingest_web("https://www.wikipedia.org/", topic="test", crawl_depth=1, crawl_pages_cap=5)
-    print(res)
+    callback = orion_store_callback_factory()
+
+    # Run test ingestion from Wikipedia
+    result = ing.ingest_web(
+        url="https://en.wikipedia.org/wiki/GPT-4",
+        topic="test-web-ingest",
+        crawl_depth=1,
+        crawl_pages_cap=2,
+        store_callback=callback,
+    )
+
+    print("Ingestion Result:")
+    print(result)

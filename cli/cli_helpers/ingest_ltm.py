@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import List, Dict, Any
 from chromadb import PersistentClient
-from sentence_transformers import SentenceTransformer
+from cli.cli_helpers.ltm_helpers import embed_text, embed_and_store
 from cli_helpers.utils import normalize_topic
 from datetime import datetime
 from cli_helpers.ltm_helpers import embed_and_store
@@ -184,24 +184,31 @@ def run(
         return
 
     # embed & add in batches
-    model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
     added = 0
     for start in range(0, len(docs), batch_size):
         end = min(start + batch_size, len(docs))
         batch_docs = docs[start:end]
         batch_ids = ids[start:end]
         batch_metas = metas[start:end]
-        vecs = model.encode(batch_docs, show_progress_bar=False, convert_to_numpy=True)
+
+        # Use centralized embed_text() for consistency
+        vecs = [embed_text(d) for d in batch_docs]
+
         # Ensure lengths align
         _ensure_lists(batch_ids, "ids")
         _ensure_lists(batch_docs, "documents")
         _ensure_lists(batch_metas, "metadatas")
 
-        coll.add(ids=batch_ids, documents=batch_docs, metadatas=batch_metas, embeddings=vecs.tolist())
+        coll.add(
+            ids=batch_ids,
+            documents=batch_docs,
+            metadatas=batch_metas,
+            embeddings=vecs
+        )
         added += len(batch_ids)
 
     print(f"✅ Ingested {added} items into Chroma → collection='{collection_name}' (persist='{persist_dir}')")
-
+    
 def _chunks_from_text(text: str):
     """Split text into manageable chunks (paragraphs/sentences)."""
     paras = [p.strip() for p in re.split(r'\n\s*\n', text) if p.strip()]
@@ -243,7 +250,6 @@ def ingest_txt_direct(
     chunks = _chunks_from_text(text)
     client = PersistentClient(path=persist_dir)
     coll = client.get_or_create_collection(name=collection_name)
-    model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
 
     docs, metas, ids = [], [], []
     base_id = hashlib.sha1((str(p.resolve()) + str(p.stat().st_mtime)).encode("utf-8")).hexdigest()

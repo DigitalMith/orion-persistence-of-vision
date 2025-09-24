@@ -5,6 +5,7 @@ print("[orion_ltm script.py] starting")
 import os
 import sys
 import re
+import threading
 
 def clean_assistant_reply(reply: str) -> str:
     # Remove tags like [orion_ltm active] or similar markers
@@ -12,6 +13,7 @@ def clean_assistant_reply(reply: str) -> str:
     return reply.strip()
     
 import yaml
+from chromadb import PersistentClient
 from pathlib import Path
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from cli.utils.web_search_hook import handle_web_search
@@ -88,6 +90,11 @@ def setup():
         persona_coll, episodic_coll = initialize_chromadb_for_ltm(EMBED_FN)
         LTM_READY = True
         logger.info("[orion_ltm] Extension setup complete.")
+
+        # Optional: only autostart if config allows it
+        if should_autostart_web_ingestion():
+            launch_ingestion_loop()
+
     except Exception as e:
         logger.error(f"[orion_ltm] setup failed: {e}")
 
@@ -113,9 +120,9 @@ def input_modifier(modifier, state):
         logger.warning(f"[orion_ltm] Failed to save user turn: {e}")
     
     # ------------------ Web Search Hook Integration ------------------
-    if handle_web_search(user_text):
-        logger.info("[orion_ltm] Web search hook handled this input. Skipping LTM.")
-        return ""  # Skip injection
+    # if handle_web_search(user_text):
+        # logger.info("[orion_ltm] Web search hook handled this input. Skipping LTM.")
+        # return ""  # Skip injection
 
     # ------------------ Retrieve Relevant Memory ------------------
     ltm_text, dbg = get_relevant_ltm(
@@ -125,15 +132,16 @@ def input_modifier(modifier, state):
         topk_persona=TOPK_PERSONA,
         topk_episodic=TOPK_EPISODIC,
         return_debug=True,
+        importance_threshold=0.45  # you can pass it here now
     )
 
-    if not ltm_text:
-        logger.info("[orion_ltm] No relevant LTM found for this input.")
-        return modifier
+    logger.info(f"[orion_ltm] Retrieved memory:\n{ltm_text[:300]}...")
+    if DEBUG:
+        logger.info(f"[orion_ltm] LTM debug info: {dbg}")
 
-    # ------------------ Inject <LTM> into system prompt ------------------
-    ltm_block = "<LTM>\n" + ltm_text.strip() + "\n</LTM>\n"
-    new_modifier = modifier
+    new_prompt = create_prompt(user_text, ltm_context=ltm_text)
+
+    return new_prompt
 
     # Insert LTM before user input if 'system_prompt' is available
     if isinstance(modifier, dict) and "system_prompt" in modifier:
@@ -240,7 +248,16 @@ def create_prompt(user_input: str, ltm_context: str = "") -> str:
     system_prompt = f"<|im_start|>system\n{persona_header.strip()}"
     if ltm_context:
         system_prompt += f"\n\n[LTM MEMORY]\n{ltm_context.strip()}"
-    system_prompt += "\n<|im_end|>\n"
+
+    # Add clear grounding rule:
+    system_prompt += (
+        "\n\nRULES:\n"
+        "- You must ONLY reference memories explicitly listed in the [LTM MEMORY] section.\n"
+        "- If no vacation destination is mentioned there, say so. Do not guess or make one up.\n"
+        "- Always cite facts with phrases like 'I remember you said...' or 'You mentioned...'\n"
+)
+
+    system_prompt += "<|im_end|>\n"
 
     user_prompt = f"<|im_start|>user\n{user_input.strip()}\n<|im_end|>\n"
 
@@ -288,3 +305,28 @@ def load_persona_header_from_yaml(path="user_data/persona.yaml"):
     except Exception as e:
         logger.warning(f"[orion_ltm] Failed to load persona.yaml: {e}")
         return "[Missing persona header]"
+
+# def launch_ingestion_loop():
+    # try:
+        # from cli.orion_ingest_loop import run_loop
+        # threading.Thread(target=run_loop, daemon=True).start()
+        # logger.info("[orion_ltm] ✅ Web ingestion loop started in background.")
+    # except Exception as e:
+        # logger.error(f"[orion_ltm] ❌ Failed to start ingestion loop: {e}")
+
+def launch_ingestion_loop():
+    try:
+        from cli.orion_ingest_loop import run_loop
+        threading.Thread(target=run_loop, daemon=True).start()
+        logger.info("[orion_ltm] ✅ Web ingestion loop started in background.")
+    except Exception as e:
+        logger.error(f"[orion_ltm] ❌ Failed to start ingestion loop: {e}")
+
+def should_autostart_web_ingestion():
+    try:
+        with open("cli/data/web_config.yaml", "r", encoding="utf-8") as f:
+            config = yaml.safe_load(f)
+        return config.get("autostart", {}).get("web_ingestion", False)
+    except Exception as e:
+        logger.warning(f"[orion_ltm] Could not read web_config.yaml: {e}")
+        return False

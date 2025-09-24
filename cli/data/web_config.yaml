@@ -1,0 +1,60 @@
+autostart:
+  web_ingestion: true
+  
+web_search:
+  api_key: "930b0d7915cc22f6d9751bf6e3d1f728c0488dc5"  # Serper.dev key
+  provider: "serper"          # serper, google, bing
+  max_results: 5
+  save_to_ltm: true
+  summarize_snippets: true
+  chunk_size: 150
+  topic_prefix: "web-search"
+  tags: ["web-search"]
+  allowed_domains:
+    - "wikipedia.org"
+    - "nasa.gov"
+    - "example.com"
+
+api:
+  provider: "ollama"          # ← this is where Ollama belongs
+  model: "llama3"             # ← and your model name
+  key: ""                     # Ollama doesn’t need an API key
+  language: "en"
+  region: "US"
+  max_results: 5
+  
+ltm:
+  persist_dir: "user_data/chroma_db"
+  collection_name: "orion_episodic_sent_ltm"
+  importance_default: 0.5
+  recency_weight: 0.5
+  importance_weight: 0.5
+
+embedding_model: "sentence-transformers/all-MiniLM-L6-v2"
+
+autonomy:
+  mode: limited             # manual | limited | trusted | open
+  require_approval:
+    web: false              # require approval before ingesting URLs
+    image: false            # auto-ingest screenshots unless too large
+  max_ingestions:
+    per_hour: 5             # limit ingestion to prevent spiral
+    per_day: 25             # daily safety net
+  ttl_days_default: 14      # default expiration time for memories
+  max_tokens: 8000          # max token size per document
+  max_image_size: 5120      # in KB — reject large screenshots
+  allow_tags:
+    - websearch
+    - web-search
+    - astronomy
+    - physics
+    - vision
+    - observation
+    - logentry
+  
+  deduplication: true       # enable SHA256-based duplication check
+  memory_archive_path: C:/Orion/text-generation-webui/data/memory_archive.jsonl
+log_path: C:/Orion/text-generation-webui/cli/data/logs/ingest_log.jsonl
+
+embedding:
+  hf_token: ""

@@ -2,7 +2,7 @@
 # Do NOT import any submodules here.
 
 __all__ = [
-    "ltm_ingest",
+    "ingest_ltm",
     "ltm_query",
     "ltm_peek",
     "delete_topic",

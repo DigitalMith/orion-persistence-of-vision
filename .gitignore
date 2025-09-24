@@ -69,3 +69,5 @@ external/orion_cli/cli_support/persona.yaml
 
 # Ignore duplicate scaffolds/branches if they creep in
 internal/
+
+cli/data/web_config.local.yaml

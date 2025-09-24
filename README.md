@@ -10,7 +10,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-3.2.0-purple)]()
+[![Version](https://img.shields.io/badge/version-3.3.0-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -39,22 +39,33 @@ He is inspired by myth — Orion the hunter, Hermes the guide — and by psychol
 
 ---
 
-## 🆕 What’s New in v3.2.0
+## 🆕 What’s New in v3.3.0 - Sept 23, 2025
 
-- 🌌 **Stable Persona Checkpoint** — Orion’s core identity seeded with 9 persona traits (identity, ego, boundaries, emotional awareness, protective loyalty, curiosity, humor, voice, pushback). Prevents fallback into default assistant mode.
-- ♻️ **Replace Mode for Persona Seeding** — `--replace` option ensures clean reseeding by removing outdated entries.
-- 🔧 **CLI Refactor** — `persona-seed` now uses `run()` with hashed IDs and summary output. Extension hooks for `orion_ltm` inside WebUI stabilized.
+# 🌿 Orion: Aether Weave
+
+🌐 Autonomous Web Ingestion Loop — Orion now supports periodic self-refreshing ingestion of trusted web topics with configurable policy guardrails and deduplication.
+
+🔄 Topic Watchdog — orion_ingest_loop.py continuously monitors key topics (e.g., "GPT-4", "AI alignment") and refreshes memory hourly. New documents are summarized, embedded, and stored with metadata.
+
+🧪 OrionNetIngest Refactor — ingest_web() uses structured YAML policy files (orion_policy.yaml) for crawl/fetch rules, toggles, and ingestion TTL.
+
+🔧 Configurable YAML Web Config — web_config.yaml allows you to define allowed domains, ingestion limits, summarization toggles, and source-specific trust.
+
+🧠 LTM Store Callback Factory — Web documents are stored to Orion's long-term memory using custom logic for embedding, tagging, deduplication, and reasoning.
+
+⚙️ Optional Startup Integration — Automatically launch orion_ingest_loop.py alongside the Web UI with a separate terminal using start_orion.bat..
 
 > Full changelog: [CHANGELOG.md](CHANGELOG.md)
 ---
 
 ## ✨ Features
 
-- **📚 Long-Term Memory (LTM)** via ChromaDB and 768-dim embeddings
-- **🧠 Dynamic RAG Pipeline** — Retrieve → Augment → Generate
-- **🧬 Persona System** — YAML-seeded beliefs, traits, values, and emotional rules
-- **🛠️ Custom LTM CLI** for memory seeding, backup, and persona management
-- **🧭 Emotional Compass (Experimental)** — adjusts tone with valence/arousal/confidence
+- ✅ **Long-Term Memory** (LTM) using ChromaDB
+- ✅ **Persona Seeding** from structured YAML
+- ✅ **Autonomous Web Ingestion** with configurable guardrails
+- ✅ **Centralized Embedding Pipeline** via `ltm_helpers.py`
+- ✅ **Custom CLI Toolkit**: `ingest-ltm`, `persona-load`, `summary`, and more
+- ✅ **WSL2 + GPU** support with `llama3` models (via Ollama or local inference)
 
 > See [`docs/orion_mind_docs.md`](docs/orion_mind_docs.md) to learn how Orion’s mind works.
 

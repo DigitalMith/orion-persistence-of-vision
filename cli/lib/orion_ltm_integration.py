@@ -40,7 +40,7 @@ def get_relevant_ltm(
     episodic_coll,
     topk_persona: int = 6,
     topk_episodic: int = 8,
-    importance_threshold: float = 0.6,
+    importance_threshold: float = 0.55,
     return_debug: bool = False,
 ):
     """
@@ -105,6 +105,10 @@ def get_relevant_ltm(
         "episodic_top": topk_episodic,
     }
 
+    print(f"[ltm] Retrieved {len(results)} memory entries:")
+    for r in results:
+        print(f" - [{r['source']}] score={r['score']:.2f} :: {r['doc'][:80]}")
+    
     return ("\n".join(ctx_lines), dbg) if return_debug else "\n".join(ctx_lines)
 
 

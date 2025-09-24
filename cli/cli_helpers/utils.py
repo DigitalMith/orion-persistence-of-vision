@@ -5,6 +5,8 @@ import hashlib
 import json
 from typing import Dict, Any
 from chromadb import PersistentClient
+from cli_helpers.ltm_helpers import embed_text  # <-- Import centralized embed_text
+
 
 def init_collection(collection_name: str, persist_dir: str = "user_data/chroma_db"):
     client = PersistentClient(path=persist_dir)
@@ -30,20 +32,10 @@ def load_yaml_sections(yaml_path: str) -> Dict[str, Any]:
     return data
 
 def embed_and_store(text: str, metadata: dict, role: str, collection):
-    from sentence_transformers import SentenceTransformer
+    if not text.strip():
+        return
 
-    # Load config
-    with open("cli/data/web_config.yaml", "r", encoding="utf-8") as f:
-        config = yaml.safe_load(f)
-
-    hf_token = config.get("embedding", {}).get("hf_token")
-
-    if hf_token:
-        os.environ["HUGGINGFACE_HUB_TOKEN"] = hf_token
-
-    model = SentenceTransformer("sentence-transformers/all-mpnet-base-v2")
-    embedding = model.encode([text], convert_to_numpy=True)[0].tolist()
-    
+    embedding = embed_text(text)
 
     doc_id = hashlib.sha1((text + json.dumps(metadata)).encode("utf-8")).hexdigest()
 

@@ -44,4 +44,7 @@ call "%PYTHON%" server.py ^
  --extensions orion_ltm ^
  --listen
 
+REM --- Start Orion autonomous ingestion loop in a new window ---
+start "OrionIngest" cmd /k "%PYTHON% -m cli.orion_ingest_loop"
+
 pause

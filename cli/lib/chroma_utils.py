@@ -1,14 +1,27 @@
 # cli/lib/chroma_utils.py
 import os
-from chromadb import PersistentClient
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+from chromadb import PersistentClient
+from sentence_transformers import SentenceTransformer
 
-# Pick embedding model from environment (fallback if not set)
-# MODEL_NAME = os.environ.get("ORION_EMBED_MODEL", "all-MiniLM-L6-v2")
-# EMBED_FN = SentenceTransformerEmbeddingFunction(model_name=MODEL_NAME)
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"  # ✅ THIS is the correct HF model name
+MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
 
-EMBED_FN = SentenceTransformerEmbeddingFunction(model_name=MODEL_NAME)
+EMBED_FN = SentenceTransformerEmbeddingFunction(
+    model_name=MODEL_NAME,
+    model_kwargs={"local_files_only": False}
+)
+
+# ✅ Optional test function for debugging vector size
+def _debug_print_embedding_dim():
+    try:
+        test_vec = EMBED_FN(["test"])[0]
+        print(f"[DEBUG] Embedding model '{MODEL_NAME}' dimension: {len(test_vec)}")
+    except Exception as e:
+        print("[ERROR] Failed to compute test embedding:", e)
+
+def embed_fn(texts):
+    return EMBED_MODEL.encode(texts, convert_to_numpy=True, normalize_embeddings=True).tolist()
+
 
 def get_client(persist_dir="user_data/chroma_db"):
     """
@@ -43,3 +56,7 @@ def _get_or_create(name: str, *, cosine: bool = False, embed_fn=EMBED_FN, persis
     except Exception as e:
         print(f"[ERROR] Failed to get/create collection '{name}': {e}")
         raise
+
+# ✅ Only run this if script is directly executed
+if __name__ == "__main__":
+    _debug_print_embedding_dim()
