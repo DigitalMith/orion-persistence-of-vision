@@ -17,6 +17,8 @@ from safetensors.torch import load_file as safe_load
 dataset_path = r"C:/Orion/train/lora_dataset.jsonl"
 model_path = r"C:\Orion\lora\~\mistral_models\7B-Instruct-v0.3"
 output_dir = "C:/Orion/lora/orion_mystic_lora/live_run"
+max_len = 1024  # allow deeper symbolic chunks
+resume_training = False  # ❗ Flip to False for clean run
 
 # -----------------------------
 # Load dataset
@@ -39,7 +41,7 @@ def tokenize(batch):
         texts,
         truncation=True,
         padding="max_length",
-        max_length=512
+        max_length=max_len
     )
     tokens["labels"] = tokens["input_ids"].copy()
     return tokens
@@ -54,9 +56,10 @@ tokenized = dataset.map(
 # Load model (4-bit quantized for GPU safety)
 # -----------------------------
 bnb_config = BitsAndBytesConfig(
-    load_in_8bit=True,
-    llm_int8_threshold=6.0,
-    llm_int8_has_fp16_weight=False
+    load_in_4bit=True,
+    bnb_4bit_compute_dtype=torch.float16,
+    bnb_4bit_use_double_quant=True,
+    bnb_4bit_quant_type="nf4"
 )
 
 model = AutoModelForCausalLM.from_pretrained(
@@ -69,9 +72,9 @@ model = AutoModelForCausalLM.from_pretrained(
 # LoRA Config
 # -----------------------------
 lora_config = LoraConfig(
-    r=8,
-    lora_alpha=16,
-    lora_dropout=0.05,
+    r=16,                        # deeper adaptation
+    lora_alpha=32,              # typically 2× rank
+    lora_dropout=0.1,           # more regularization for poetic/lofty data
     bias="none",
     task_type="CAUSAL_LM"
 )
@@ -83,12 +86,20 @@ model = get_peft_model(model, lora_config)
 # -----------------------------
 class SafeTensorSaveCallback(TrainerCallback):
     def on_save(self, args, state, control, **kwargs):
-        # delete any accidental .bin checkpoints
         for f in glob.glob(os.path.join(args.output_dir, "*.bin")):
             try:
                 os.remove(f)
             except OSError:
                 pass
+        return control
+
+# -----------------------------
+# Optional: Symbolic Eval Callback
+# -----------------------------
+class OrionEvalCallback(TrainerCallback):
+    def on_evaluate(self, args, state, control, **kwargs):
+        print("🔮 Orion Evaluation Checkpoint Reached.")
+        # You can add eval logic or generation samples here
         return control
 
 # -----------------------------
@@ -113,7 +124,8 @@ args = TrainingArguments(
 trainer = Trainer(
     model=model,
     args=args,
-    train_dataset=tokenized
+    train_dataset=tokenized,
+    callbacks=[SafeTensorSaveCallback(), OrionEvalCallback()]
 )
 
 # 🔧 Patch to skip broken optimizer restore
@@ -136,7 +148,7 @@ if os.path.isdir(output_dir):
     if ckpts:
         latest_ckpt = ckpts[0]
 
-if latest_ckpt:
+if latest_ckpt and resume_training:
     print(f"🔄 Resuming weights from {latest_ckpt}")
 
     # Force skip optimizer/scheduler reload
@@ -153,12 +165,20 @@ if latest_ckpt:
     model.load_state_dict(state_dict, strict=False)
 
     # Resume training with fresh optimizer but restored weights
-    trainer.train()
+    try:
+        trainer.train()
+    except KeyboardInterrupt:
+        print("🛑 Training manually stopped. Saving partial state...")
+    finally:
+        final_dir = "C:/Orion/lora/orion_mystic_lora/final"
+        model.save_pretrained(final_dir, safe_serialization=True)
+        tokenizer.save_pretrained(final_dir)
 else:
     print("🚀 Starting fresh training run")
     trainer.train()
 
 # Final save
-final_dir = "C:/Orion/lora/orion_mystic_lora/final"
-model.save_pretrained(final_dir, safe_serialization=True)
-tokenizer.save_pretrained(final_dir)
+if not resume_training or not latest_ckpt:
+    final_dir = "C:/Orion/lora/orion_mystic_lora/final"
+    model.save_pretrained(final_dir, safe_serialization=True)
+    tokenizer.save_pretrained(final_dir)

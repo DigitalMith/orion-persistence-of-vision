@@ -3,6 +3,8 @@
 import os
 import json
 from chromadb import PersistentClient
+
+from cli.data.web_config import WEB_CONFIG  # ← import your config
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
 from cli.lib.chroma_utils import reset_collection
 
@@ -13,7 +15,11 @@ INPUT_FILE = "cli/data/merged_ltm_v3(Chroma_Ready).jsonl"
 
 # === Embedding Function Setup ===
 def get_embed_fn():
-    model_name = os.environ.get("ORION_EMBED_MODEL", "all-MiniLM-L6-v2")
+    # Allow env var override, but default to web_config.yaml
+    model_name = os.environ.get(
+        "ORION_EMBED_MODEL",
+        WEB_CONFIG.get("embedding_model", "sentence-transformers/all-mpnet-base-v2")
+    )
     print(f"[DEBUG] Using embedding model: {model_name}")
     return SentenceTransformerEmbeddingFunction(model_name=model_name)
 
@@ -42,7 +48,7 @@ def restore_ltm_from_jsonl(input_path, collection_name):
         embedding_function=EMBED_FN
     )
 
-    reset_collection(collection_name, EMBED_FN)
+    collection = reset_collection(collection_name, EMBED_FN)
     print(f"🧹 Reset collection: {collection_name}")
 
     added = 0

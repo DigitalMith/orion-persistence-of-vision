@@ -3,6 +3,13 @@ REM ==========================================
 REM Orion Startup Script (venv version)
 REM ==========================================
 
+:: Set working directory to Orion root
+cd /d C:\Orion\text-generation-webui
+:: Enable logging for LTM injections
+set ORION_LTM_DEBUG=1
+:: Optional: force embedding model consistency
+set ORION_EMBED_MODEL=sentence-transformers/all-mpnet-base-v2
+
 REM --- Set Core Paths ---
 set "TGWUI_DIR=C:\Orion\text-generation-webui"
 set "PYTHON=%TGWUI_DIR%\venv-orion\Scripts\python.exe"

@@ -71,3 +71,8 @@ external/orion_cli/cli_support/persona.yaml
 internal/
 
 cli/data/web_config.local.yaml
+
+# Secrets & tokens
+web_config.local.yaml
+.env
+*.env

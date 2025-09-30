@@ -21,7 +21,7 @@ def get_embedding_model():
         if hf_token:
             os.environ["HUGGINGFACE_HUB_TOKEN"] = hf_token
 
-        model_name = config.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2")
+        model_name = config.get("embedding_model", "sentence-transformers/all-mpnet-base-v2")
         _MODEL = SentenceTransformer(model_name, local_files_only=False)  # force online mode
         print(f"[✅] Loaded embedding model: {model_name}")
     return _MODEL

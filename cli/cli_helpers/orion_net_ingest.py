@@ -382,35 +382,40 @@ class OrionNetIngest:
 
 # cli_helpers/orion_net_ingest.py
 def orion_store_callback_factory():
-    def store(text: str, metadata: dict, role: str = "user"):
+    def store(summary: dict, topic: str):
+        text = summary.get("raw_excerpt", "")
+        if not isinstance(text, str) or not text.strip():
+            print(f"[🟡 store callback] Skipped empty or invalid text: {type(text)}")
+            return False  # make return type explicit
+
+        metadata = {
+            "source": summary.get("source"),
+            "topic": topic,
+            "timestamp": datetime.utcnow().isoformat(),
+            "doc_id": summary.get("hash"),
+            "why_saved": summary.get("why_saved"),
+            "type": "web",
+        }
+
+        # 🔍 Diagnostic logging
+        print(f"\n[🧠 STORE] Topic: {topic}")
+        print(f"[📄 EXCERPT] {text[:150]}{'...' if len(text) > 150 else ''}")
+        print(f"[📎 METADATA] {metadata}")
+
         try:
-            embed_and_store(text, metadata=metadata, role=role, collection_name="orion_episodic_sent_ltm")
+            embed_and_store(
+                text,
+                metadata=metadata,
+                role="user",
+                collection_name="orion_episodic_sent_ltm"
+            )
+            print("[✅ STORED] Successfully embedded and stored.\n")
+            return True
         except Exception as e:
-            print(f"[store callback error] Failed to store: {e}")
+            print(f"[❌ ERROR] Failed to store: {e}\n")
+            return False
+
     return store
-
-# if __name__ == "__main__":
-    # policy_file = os.environ.get("ORION_POLICY", r"C:\Orion\text-generation-webui\orion_policy.yaml")
-    # ing = OrionNetIngest(policy_file)
-    # res = ing.ingest_web("https://www.wikipedia.org/", topic="test", crawl_depth=1, crawl_pages_cap=5)
-    # print(res)
-
-if __name__ == "__main__":
-    # Set path to your policy YAML
-    policy_file = os.environ.get("ORION_POLICY", r"C:\Orion\text-generation-webui\orion_policy.yaml")
-
-    # Create ingestion engine and callback
-    ing = OrionNetIngest(policy_file)
-    callback = orion_store_callback_factory()
-
-    # Run test ingestion from Wikipedia
-    result = ing.ingest_web(
-        url="https://en.wikipedia.org/wiki/GPT-4",
-        topic="test-web-ingest",
-        crawl_depth=1,
-        crawl_pages_cap=2,
-        store_callback=callback,
-    )
 
     print("Ingestion Result:")
     print(result)

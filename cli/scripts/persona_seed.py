@@ -1,37 +1,48 @@
-# cli/scripts/persona_seed.py
-
+import argparse
 import os
 import sys
 import yaml
+import json
 import uuid
-import argparse
+from datetime import datetime
+import chromadb
+from chromadb.utils import embedding_functions
+from chromadb.config import Settings
 from chromadb import PersistentClient
-from modules.logging_colors import logger
 
-DEFAULT_YAML = "cli/data/persona.yaml"
+# Logging setup
+class SimpleLogger:
+    @staticmethod
+    def info(msg):
+        print(f"[INFO] {msg}")
+
+    @staticmethod
+    def warning(msg):
+        print(f"[WARNING] {msg}")
+
+    @staticmethod
+    def error(msg):
+        print(f"[ERROR] {msg}")
+
+logger = SimpleLogger()
+
 COLLECTION_NAME = "orion_persona"
-CHROMA_PATH = "user_data/chroma_db"  # Use TGWUI default
+CHROMA_PATH = "user_data/chroma"
+
+# Flatten metadata values
+def flatten_metadata(metadata):
+    flat_meta = {}
+    for k, v in metadata.items():
+        if isinstance(v, list):
+            flat_meta[k] = ", ".join(str(item) for item in v)
+        elif isinstance(v, (str, int, float, bool)):
+            flat_meta[k] = v
+        else:
+            flat_meta[k] = str(v)
+    return flat_meta
 
 def clean_metadata(meta):
-    return {
-        k: (
-            ", ".join(v) if isinstance(v, list) else
-            str(v) if v is not None else ""
-        )
-        for k, v in meta.items()
-    }
-    
-def flatten_metadata(meta):
-    """Convert metadata dict values to Chroma-compatible formats."""
-    flat = {}
-    for k, v in meta.items():
-        if isinstance(v, list):
-            flat[k] = ", ".join(str(i) for i in v)
-        elif isinstance(v, (str, int, float, bool)) or v is None:
-            flat[k] = v
-        else:
-            flat[k] = str(v)
-    return flat
+    return {k: v for k, v in meta.items() if v is not None and isinstance(v, (str, int, float, bool))}
 
 def seed_persona(yaml_path):
     logger.info(f"[persona_seed] Seeding '{COLLECTION_NAME}' from {yaml_path}")
@@ -43,12 +54,23 @@ def seed_persona(yaml_path):
     with open(path, "r", encoding="utf-8") as f:
         raw = list(yaml.safe_load_all(f))
 
+    # Support simple YAML personas
+    if len(raw) == 1 and isinstance(raw[0], dict) and "text" not in raw[0]:
+        text_blob = "\n".join(f"{k}: {v}" for k, v in raw[0].items())
+        raw = [{
+            "persona": [{
+                "id": "orion_persona_v3",
+                "text": text_blob,
+                "tags": "persona_seed, orion_core, fallback",
+                "version": "v3.0"
+            }]
+        }]
+
     client = PersistentClient(path=CHROMA_PATH)
     collection = client.get_or_create_collection(COLLECTION_NAME)
 
     # 🔥 Wipe existing data
-    # ✅ Delete all entries safely (backwards-compatible)
-    ids = [doc_id for doc_id in collection.get(include=[])["ids"]]
+    ids = [doc_id for doc_id in collection.get(include=[])['ids']]
     if ids:
         collection.delete(ids=ids)
 
@@ -77,7 +99,6 @@ def seed_persona(yaml_path):
                     "text": None,  # exclude full text from metadata
                 }
 
-                # Fill missing priority
                 if "priority" not in meta and kind in default_priority:
                     meta["priority"] = default_priority[kind]
 
@@ -87,11 +108,11 @@ def seed_persona(yaml_path):
     added = 0
     for doc_id, text, meta in entries:
         try:
-            cleaned_meta = clean_metadata(meta)  # 👈 Clean the metadata before sending
+            cleaned_meta = clean_metadata(meta)
             collection.add(
                 ids=[doc_id],
                 documents=[text],
-                metadatas=[cleaned_meta],
+                metadatas=[cleaned_meta]
             )
             added += 1
             logger.info(f"✅ Added: {doc_id}")
@@ -102,7 +123,7 @@ def seed_persona(yaml_path):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--yaml", default=DEFAULT_YAML, help="Path to persona.yaml")
+    parser.add_argument("--yaml", required=True, help="Path to persona.yaml file")
     args = parser.parse_args()
     seed_persona(args.yaml)
 

@@ -1,15 +1,19 @@
 # cli/lib/orion_ltm_integration.py
 
-# Force Orion to use a valid HuggingFace model for embeddings
-MODEL_NAME = "sentence-transformers/all-MiniLM-L6-v2"
-
 from typing import List, Dict, Any
 import re
 import time
 
 from cli.data.web_config import WEB_CONFIG
+from cli.lib.chroma_utils import (
+    _get_or_create,
+    get_client,
+    get_collection,
+    EMBED_FN,
+)
 
-MODEL_NAME = WEB_CONFIG.get("embedding_model", "sentence-transformers/all-MiniLM-L6-v2")
+# Centralized config for embedding model
+MODEL_NAME = WEB_CONFIG.get("embedding_model", "sentence-transformers/all‑mpnet‑base‑v2")
 
 from cli.lib.chroma_utils import (
     _get_or_create,
@@ -38,8 +42,8 @@ def get_relevant_ltm(
     user_input: str,
     persona_coll,
     episodic_coll,
-    topk_persona: int = 6,
-    topk_episodic: int = 8,
+    topk_persona: int = 2,
+    topk_episodic: int = 4,
     importance_threshold: float = 0.55,
     return_debug: bool = False,
 ):

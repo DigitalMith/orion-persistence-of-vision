@@ -1,21 +1,16 @@
 # extensions/orion_ltm/script.py
 print("[orion_ltm script.py] 🟡 Starting extension load...")
-print("[orion_ltm script.py] starting")
 
 import os
 import sys
 import re
 import threading
-
-def clean_assistant_reply(reply: str) -> str:
-    # Remove tags like [orion_ltm active] or similar markers
-    reply = re.sub(r"\[orion_ltm.*?\]", "", reply)
-    return reply.strip()
-    
 import yaml
-from chromadb import PersistentClient
 from pathlib import Path
+
 from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+from chromadb import PersistentClient
+from cli.data.web_config import WEB_CONFIG  # ✅ use centralized config
 from cli.utils.web_search_hook import handle_web_search
 
 # Prefer colored logger if available
@@ -25,12 +20,15 @@ except ImportError:
     import logging
     logger = logging.getLogger("orion_ltm")
 
-BASE = Path(r"C:\Orion\text-generation-webui\user_data\models\embeddings\all-MiniLM-L6-v2\snapshots")
-latest_snapshot = max(BASE.iterdir(), key=os.path.getmtime)  # pick most recent
-MODEL_PATH = str(latest_snapshot)
+# === Setup logs (ensure directory exists)
+LOG_DIR = Path(__file__).parent.parent.parent / "logs"
+LOG_FILE = LOG_DIR / "injected_prompt_log.txt"
+LOG_DIR.mkdir(exist_ok=True)
 
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
-EMBED_FN = SentenceTransformerEmbeddingFunction(model_name=MODEL_PATH)
+# === Use embedding model from config
+MODEL_NAME = WEB_CONFIG.get("embedding_model", "sentence-transformers/all-mpnet-base-v2")
+logger.info(f"[orion_ltm] Using embedding model: {MODEL_NAME}")
+EMBED_FN = SentenceTransformerEmbeddingFunction(model_name=MODEL_NAME)
 
 def get_embed_fn():
     model_name = os.environ.get("ORION_EMBED_MODEL", "all-MiniLM-L6-v2")
@@ -41,8 +39,8 @@ EMBED_FN = get_embed_fn()
 
 # Debugging and constants
 DEBUG = os.environ.get("ORION_LTM_DEBUG", "0") == "1"
-TOPK_PERSONA = int(os.environ.get("ORION_LTM_TOPK_PERSONA", "3"))
-TOPK_EPISODIC = int(os.environ.get("ORION_LTM_TOPK_EPISODIC", "5"))
+TOPK_PERSONA = int(os.environ.get("ORION_LTM_TOPK_PERSONA", "2"))
+TOPK_EPISODIC = int(os.environ.get("ORION_LTM_TOPK_EPISODIC", "4"))
 
 # Setup sys.path to include custom CLI and LTM integrations
 ROOT = Path(__file__).resolve().parents[2]
@@ -173,6 +171,15 @@ def input_modifier(modifier, state):
 
     return new_modifier
 
+def clean_assistant_reply(reply: str) -> str:
+    """
+    Remove special LTM debug tags or extra markers from assistant responses before storing.
+    """
+    # Remove any bracketed tags like [orion_ltm active] or [ltm]
+    reply = re.sub(r"\[orion_ltm.*?\]", "", reply)
+    reply = re.sub(r"\[ltm.*?\]", "", reply)
+    return reply.strip()
+    
 def output_modifier(text: str, state):
     try:
         if state and isinstance(state, dict):

@@ -4,12 +4,9 @@ from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunct
 from chromadb import PersistentClient
 from sentence_transformers import SentenceTransformer
 
-MODEL_NAME = "sentence-transformers/all-mpnet-base-v2"
-
-EMBED_FN = SentenceTransformerEmbeddingFunction(
-    model_name=MODEL_NAME,
-    model_kwargs={"local_files_only": False}
-)
+from cli.data.web_config import WEB_CONFIG
+MODEL_NAME = WEB_CONFIG.get("embedding_model", "sentence-transformers/all-mpnet-base-v2")
+EMBED_FN = SentenceTransformerEmbeddingFunction(model_name=MODEL_NAME)
 
 # ✅ Optional test function for debugging vector size
 def _debug_print_embedding_dim():
@@ -57,6 +54,22 @@ def _get_or_create(name: str, *, cosine: bool = False, embed_fn=EMBED_FN, persis
         print(f"[ERROR] Failed to get/create collection '{name}': {e}")
         raise
 
+def reset_collection(collection_name, embed_fn=None, persist_dir="user_data/chroma_db"):
+    """
+    Deletes and recreates the specified collection. Useful for restoring or reseeding.
+    """
+    client = get_client(persist_dir)
+    try:
+        client.delete_collection(name=collection_name)
+    except Exception as e:
+        print(f"[WARNING] Failed to delete collection '{collection_name}': {e}")
+
+    # ✅ Pass the embedding function correctly:
+    return client.get_or_create_collection(
+        name=collection_name,
+        embedding_function=embed_fn
+    )
+    
 # ✅ Only run this if script is directly executed
 if __name__ == "__main__":
     _debug_print_embedding_dim()
