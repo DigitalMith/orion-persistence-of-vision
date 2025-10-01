@@ -38,6 +38,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## 🚀 Orion CLI v3.4 — Developer-Grade Command Line Interface
+
+The CLI has been fully restructured and modularized for scale, clarity, and collaboration. Key features:
+
+- 📁 **Modular Folder Structure** — Commands grouped under `core/` and `modules/` for logical separation.
+- 🧠 **Memory Control** — Query, normalize, summarize, export, and delete long-term memory entries.
+- 🤖 **Persona Management** — Seed, verify, and debug Orion's core persona with ease.
+- 🧪 **Embedding Inspection** — New `check-embed` hook to validate vector dimensions and contents.
+- 📜 **Centralized Configs** — Loads `.env`, `web_config.yaml`, and other settings from `config/`.
+
+```bash
+# Example usage
+poetry run orion-cli persona-check
+poetry run orion-cli ltm-query --query "Tell me about our first mission"
+```
+
+---
+
 ## [3.2.0] - 2025-09-14
 
 ### Added

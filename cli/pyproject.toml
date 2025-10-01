@@ -1,0 +1,27 @@
+[tool.poetry]
+name = "orion-cli"
+version = "3.4.0"
+description = "Long-term memory and persona management CLI for Orion AI"
+authors = ["John Richards <you@example.com>"]
+readme = "README.md"
+# packages = [{ include = "cli" }]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.12"
+chromadb = "^0.4.22"
+torch = "^2.1.0"
+torchvision = "^0.16.0"
+transformers = "4.28.0"
+sentence-transformers = "^2.2.2"
+pyyaml = "^6.0"
+numpy = "<2.0"
+huggingface-hub = "0.16.4"
+
+[tool.poetry.scripts]
+orion-cli = "orion_cli:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+

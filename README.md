@@ -10,7 +10,7 @@
 
 ---
 
-[![Version](https://img.shields.io/badge/version-3.3.0-purple)]()
+[![Version](https://img.shields.io/badge/version-3.4.0-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -39,19 +39,24 @@ He is inspired by myth — Orion the hunter, Hermes the guide — and by psychol
 
 ---
 
-## 🆕 What’s New in v3.3.0 - Sept 23, 2025
+## 🆕 What’s New in v3.4.0 - Oct 1, 2025
 
-# 🌿 Orion: Aether Weave
+# 🛠️ Orion CLI Rebuild
 
-🌐 Autonomous Web Ingestion Loop — Orion now supports periodic self-refreshing ingestion of trusted web topics with configurable policy guardrails and deduplication.
 
-🔄 Topic Watchdog — orion_ingest_loop.py continuously monitors key topics (e.g., "GPT-4", "AI alignment") and refreshes memory hourly. New documents are summarized, embedded, and stored with metadata.
+🎯 **Modular CLI Toolkit** — Orion's command-line interface was fully rebuilt into a modular `orion-cli` package, now installable via Poetry or directly runnable with `poetry run orion-cli`.
 
-🧪 OrionNetIngest Refactor — ingest_web() uses structured YAML policy files (orion_policy.yaml) for crawl/fetch rules, toggles, and ingestion TTL.
+📁 **Structured Subcommands** — New CLI subcommands include: `persona-check`, `ltm-restore`, `ltm-summary`, `ltm-normalize`, `ltm-query`, `ltm-delete`, `ltm-export`, `merge-jsonl`, `check-embed`, and more.
 
-🔧 Configurable YAML Web Config — web_config.yaml allows you to define allowed domains, ingestion limits, summarization toggles, and source-specific trust.
+🧩 **Composable Architecture** — Logic split cleanly across `core/` (orchestration) and `modules/` (implementation), allowing devs to extend Orion's cognitive capabilities with simple Python hooks.
 
-🧠 LTM Store Callback Factory — Web documents are stored to Orion's long-term memory using custom logic for embedding, tagging, deduplication, and reasoning.
+🔍 **Memory Debug Tools** — Added embedding verification, Chroma stats, and flexible topic export/delete via CLI flags.
+
+📦 **Poetry Integration** — Clean `pyproject.toml` environment with pinned dependencies and isolated virtualenvs.
+
+💾 **Legacy Venv Fallback** — For users preferring standard venv workflows, `venv-orion` remains fully compatible.
+
+> Orion’s CLI is now worthy of his mind. Clean, fast, extensible — and battle-tested.
 
 ⚙️ Optional Startup Integration — Automatically launch orion_ingest_loop.py alongside the Web UI with a separate terminal using start_orion.bat..
 
@@ -64,7 +69,7 @@ He is inspired by myth — Orion the hunter, Hermes the guide — and by psychol
 - ✅ **Persona Seeding** from structured YAML
 - ✅ **Autonomous Web Ingestion** with configurable guardrails
 - ✅ **Centralized Embedding Pipeline** via `ltm_helpers.py`
-- ✅ **Custom CLI Toolkit**: `ingest-ltm`, `persona-load`, `summary`, and more
+- ✅ **Custom CLI Toolkit** — `orion-cli` supports persona introspection, memory ops, JSONL tools, and embedding checks
 - ✅ **WSL2 + GPU** support with `llama3` models (via Ollama or local inference)
 
 > See [`docs/orion_mind_docs.md`](docs/orion_mind_docs.md) to learn how Orion’s mind works.
@@ -95,6 +100,9 @@ python server.py --extensions orion_ltm
 ```powershell
 python -m cli.scripts.ltm_restore_jsonl --jsonl user_data/memory_seed/orion_foundation.jsonl
 ```
+### (Alt) Run CLI via Poetry
+```powershell
+poetry run orion-cli persona-check
 
 This loads Orion’s foundational persona and memory context into ChromaDB.
 

@@ -1,0 +1,56 @@
+# ⚙️ Embedding model config
+embedding_model: "sentence-transformers/all-mpnet-base-v2"  # Powerful, 768-dim
+embedding_model_device: "cuda"  # Use GPU for embeddings (set to "cpu" if no GPU)
+
+# 🧠 Main language model config
+model:
+  llm_model_name: "openhermes-2.5-mistral-7b.Q5_K_M.gguf"  # GGUF model file to use
+  quantization: "Q5_K_M"  # Matches your .gguf quantization level
+
+# 🪵 Logging options
+logging:
+  log_prompts: true         # Log prompt injections
+  log_responses: true       # Log model outputs
+  save_to: "logs/prompt_injections.log"  # Where to store the log
+
+# 🚀 Auto-start web ingestion on launch
+autostart:
+  web_ingestion: true
+
+# 🌐 Web search and ingest behavior
+web_search:
+  api_key: "930b0d7915cc22f6d9751bf6e3d1f728c0488dc5"  # 🔐 Serper.dev key
+  provider: "serper"          # Provider for search: serper, google, bing
+  max_results: 5              # Max results per search
+  save_to_ltm: true           # Store fetched content in long-term memory
+  summarize_snippets: true   # Use summarizer on web snippets
+  chunk_size: 150            # Size per web snippet chunk
+  topic_prefix: "web-search" # Used as topic label for memory tagging
+  tags: ["web-search"]       # Memory tag metadata
+  allowed_domains:           # Whitelist of domains allowed for ingest
+    - "wikipedia.org"
+    - "nasa.gov"
+    - "example.com"
+
+# 🤖 LLM API or Local Backend (Ollama, LM Studio, etc.)
+api:
+  provider: "ollama"          # Use Ollama as your backend
+  model: "llama3"             # Ollama model to use (must be installed locally)
+  key: ""                     # No API key needed for Ollama
+  language: "en"              # Default language
+  region: "US"                # Optional for geo-based APIs
+  max_results: 5              # Not always used; fallback param
+
+# 🧠 Long-Term Memory configuration
+ltm:
+  persist_dir: "user_data/chroma_db"           # ChromaDB location
+  collection_name: "orion_episodic_sent_ltm"   # Memory collection name
+  importance_default: 0.5                      # Default score if none provided
+  recency_weight: 0.3                          # Bias toward newer memories
+  importance_weight: 0.4                       # Bias toward more important memories
+  # inject_syst_
+
+# Optional Additions (Advanced Use Cases)
+# memory_tags_required: []                     # Force filtering injected memory by tag
+# persona_file: "path/to/persona.md"           # Load persona from external file
+# skip_assistant_memory: true                  # Prevent storing assistant replies in episodic memory

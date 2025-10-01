@@ -1,0 +1,6 @@
+venv-lora/
+venv-orion/
+*.safetensors
+*.gguf
+*.pt
+*.lib
