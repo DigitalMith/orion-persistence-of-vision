@@ -56,7 +56,7 @@ He is inspired by myth — Orion the hunter, Hermes the guide — and by psychol
 
 💾 **Legacy Venv Fallback** — For users preferring standard venv workflows, `venv-orion` remains fully compatible.
 
-> Orion’s CLI is now worthy of his mind. Clean, fast, extensible — and battle-tested.
+---
 
 ⚙️ Optional Startup Integration — Automatically launch orion_ingest_loop.py alongside the Web UI with a separate terminal using start_orion.bat..
 
@@ -100,9 +100,22 @@ python server.py --extensions orion_ltm
 ```powershell
 python -m cli.scripts.ltm_restore_jsonl --jsonl user_data/memory_seed/orion_foundation.jsonl
 ```
-### (Alt) Run CLI via Poetry
-```powershell
-poetry run orion-cli persona-check
+
+## 🔧 For Contributors
+
+To set up a development environment:
+
+```bash
+python -m venv venv
+venv\Scripts\activate  # On Windows
+source venv/bin/activate  # On macOS/Linux
+
+pip install -r requirements.txt
+pip install -r requirements-dev.txt
+```
+
+### Run the CLI
+python -m cli.orion_cli check-embed
 
 This loads Orion’s foundational persona and memory context into ChromaDB.
 

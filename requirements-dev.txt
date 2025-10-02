@@ -1,0 +1,12 @@
+# Formatting and linting
+black
+flake8
+
+# Testing
+pytest
+
+# Environment and dependency management
+pre-commit
+
+# Optional: for editable installs
+pip-tools
