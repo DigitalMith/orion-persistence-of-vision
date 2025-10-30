@@ -9,7 +9,7 @@ from transformers import (
     GenerationConfig,
     GenerationMixin,
     PretrainedConfig,
-    PreTrainedModel
+    PreTrainedModel,
 )
 from transformers.modeling_outputs import CausalLMOutputWithPast
 
@@ -19,9 +19,9 @@ from modules import shared
 from modules.logging_colors import logger
 
 try:
-    import flash_attn
+    pass
 except Exception:
-    logger.warning('Failed to load flash-attention due to the following error:\n')
+    logger.warning("Failed to load flash-attention due to the following error:\n")
     traceback.print_exc()
 
 
@@ -39,19 +39,21 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
         max_tokens = shared.args.ctx_size
         if max_tokens % 256 != 0:
             adjusted_tokens = ((max_tokens // 256) + 1) * 256
-            logger.warning(f"max_num_tokens must be a multiple of 256. Adjusting from {max_tokens} to {adjusted_tokens}")
+            logger.warning(
+                f"max_num_tokens must be a multiple of 256. Adjusting from {max_tokens} to {adjusted_tokens}"
+            )
             max_tokens = adjusted_tokens
 
         # Parse cache type
         cache_type = shared.args.cache_type.lower()
         cache_kwargs = {}
-        if cache_type == 'fp16':
+        if cache_type == "fp16":
             layer_type = CacheLayer_fp16
-        elif cache_type.startswith('q'):
+        elif cache_type.startswith("q"):
             layer_type = CacheLayer_quant
-            if '_' in cache_type:
+            if "_" in cache_type:
                 # Different bits for k and v (e.g., q4_q8)
-                k_part, v_part = cache_type.split('_')
+                k_part, v_part = cache_type.split("_")
                 k_bits = int(k_part[1:])
                 v_bits = int(v_part[1:])
             else:
@@ -60,26 +62,35 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
 
             # Validate bit ranges
             if not (2 <= k_bits <= 8 and 2 <= v_bits <= 8):
-                logger.warning(f"Invalid quantization bits: k_bits={k_bits}, v_bits={v_bits}. Must be between 2 and 8. Falling back to fp16.")
+                logger.warning(
+                    f"Invalid quantization bits: k_bits={k_bits}, v_bits={v_bits}. Must be between 2 and 8. Falling back to fp16."
+                )
                 layer_type = CacheLayer_fp16
             else:
-                cache_kwargs = {'k_bits': k_bits, 'v_bits': v_bits}
+                cache_kwargs = {"k_bits": k_bits, "v_bits": v_bits}
         else:
-            logger.warning(f"Unrecognized cache type: {cache_type}. Falling back to fp16.")
+            logger.warning(
+                f"Unrecognized cache type: {cache_type}. Falling back to fp16."
+            )
             layer_type = CacheLayer_fp16
 
-        self.ex_cache = Cache(self.ex_model, max_num_tokens=max_tokens, layer_type=layer_type, **cache_kwargs)
+        self.ex_cache = Cache(
+            self.ex_model,
+            max_num_tokens=max_tokens,
+            layer_type=layer_type,
+            **cache_kwargs,
+        )
 
         # Create load parameters dictionary
-        load_params = {'progressbar': True}
+        load_params = {"progressbar": True}
         if shared.args.gpu_split:
             split = [float(alloc) for alloc in shared.args.gpu_split.split(",")]
-            load_params['use_per_device'] = split
+            load_params["use_per_device"] = split
 
         # Tensor-parallelism
         if shared.args.enable_tp:
-            load_params['tensor_p'] = True
-            load_params['tp_backend'] = shared.args.tp_backend
+            load_params["tensor_p"] = True
+            load_params["tp_backend"] = shared.args.tp_backend
 
         self.ex_model.load(**load_params)
         self.past_seq = None
@@ -92,20 +103,22 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
         pass
 
     def prepare_inputs_for_generation(self, input_ids, **kwargs):
-        return {'input_ids': input_ids, **kwargs}
+        return {"input_ids": input_ids, **kwargs}
 
     @property
     def device(self) -> torch.device:
         return torch.device(0)
 
     def __call__(self, *args, **kwargs):
-        use_cache = kwargs.get('use_cache', True)
-        labels = kwargs.get('labels', None)
-        past_key_values = kwargs.get('past_key_values', None)
+        use_cache = kwargs.get("use_cache", True)
+        labels = kwargs.get("labels", None)
+        past_key_values = kwargs.get("past_key_values", None)
 
         if len(args) > 0:
             if not shared.args.cfg_cache:
-                logger.error("Please enable the cfg-cache option to use CFG with ExLlamav3_HF.")
+                logger.error(
+                    "Please enable the cfg-cache option to use CFG with ExLlamav3_HF."
+                )
                 return
 
             input_ids = args[0]
@@ -113,7 +126,7 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
             past_seq = self.past_seq_negative
             ex_cache = self.ex_cache_negative
         else:
-            input_ids = kwargs['input_ids']
+            input_ids = kwargs["input_ids"]
             is_negative = False
             past_seq = self.past_seq
             ex_cache = self.ex_cache
@@ -132,7 +145,9 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
         if labels is None:
             if past_seq is not None:
                 min_length = min(past_seq.shape[0], seq_tensor.shape[0])
-                indices = torch.nonzero(~torch.eq(past_seq[:min_length], seq_tensor[:min_length]))
+                indices = torch.nonzero(
+                    ~torch.eq(past_seq[:min_length], seq_tensor[:min_length])
+                )
                 if len(indices) > 0:
                     longest_prefix = indices[0].item()
                 else:
@@ -149,7 +164,7 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
 
                         # Process in chunks if the number of tokens is large
                         for i in range(0, tokens_to_process.shape[0], max_chunk_size):
-                            chunk = tokens_to_process[i:i + max_chunk_size]
+                            chunk = tokens_to_process[i : i + max_chunk_size]
                             self.ex_model.forward(
                                 input_ids=chunk.view(1, -1),
                                 params={
@@ -157,8 +172,8 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
                                     "cache": ex_cache,
                                     "past_len": longest_prefix + i,
                                     "batch_shape": (1, self.max_tokens),
-                                    "reconstruct": False  # Force memory-efficient path
-                                }
+                                    "reconstruct": False,  # Force memory-efficient path
+                                },
                             )
 
                         current_len = longest_prefix + remaining_tokens
@@ -171,7 +186,7 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
                     # Process in chunks if the number of tokens is large
                     current_len = 0
                     for i in range(0, tokens_to_process.shape[0], max_chunk_size):
-                        chunk = tokens_to_process[i:i + max_chunk_size]
+                        chunk = tokens_to_process[i : i + max_chunk_size]
                         self.ex_model.forward(
                             input_ids=chunk.view(1, -1),
                             params={
@@ -179,24 +194,28 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
                                 "cache": ex_cache,
                                 "past_len": current_len,
                                 "batch_shape": (1, self.max_tokens),
-                                "reconstruct": False  # Force memory-efficient path
-                            }
+                                "reconstruct": False,  # Force memory-efficient path
+                            },
                         )
                         current_len += chunk.shape[0]
                 else:
                     current_len = 0
 
             # Process the last token and get logits
-            logits = self.ex_model.forward(
-                input_ids=seq_tensor[-1:].view(1, -1),
-                params={
-                    "attn_mode": "flash_attn",
-                    "cache": ex_cache,
-                    "past_len": current_len,
-                    "batch_shape": (1, self.max_tokens),
-                    "reconstruct": False  # Force memory-efficient path
-                }
-            ).to(input_ids.device).float()
+            logits = (
+                self.ex_model.forward(
+                    input_ids=seq_tensor[-1:].view(1, -1),
+                    params={
+                        "attn_mode": "flash_attn",
+                        "cache": ex_cache,
+                        "past_len": current_len,
+                        "batch_shape": (1, self.max_tokens),
+                        "reconstruct": False,  # Force memory-efficient path
+                    },
+                )
+                .to(input_ids.device)
+                .float()
+            )
         else:
             # When processing with labels, handle as a complete sequence
             # Process in chunks if the number of tokens is large
@@ -204,13 +223,13 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
             all_logits = None
 
             for i in range(0, tokens_to_process.shape[0], max_chunk_size):
-                chunk = tokens_to_process[i:i + max_chunk_size]
+                chunk = tokens_to_process[i : i + max_chunk_size]
                 chunk_logits = self.ex_model.forward(
                     input_ids=chunk.view(1, -1),
                     params={
                         "attn_mode": "flash_attn_nc",  # No caching for training
-                        "reconstruct": False  # Force memory-efficient path
-                    }
+                        "reconstruct": False,  # Force memory-efficient path
+                    },
                 ).float()
 
                 if all_logits is None:
@@ -241,31 +260,42 @@ class Exllamav3HF(PreTrainedModel, GenerationMixin):
             shift_labels = shift_labels.to(shift_logits.device)
             loss = loss_fct(shift_logits, shift_labels)
 
-        return CausalLMOutputWithPast(logits=logits, past_key_values=seq if use_cache else None, loss=loss)
+        return CausalLMOutputWithPast(
+            logits=logits, past_key_values=seq if use_cache else None, loss=loss
+        )
 
     @classmethod
-    def from_pretrained(cls, pretrained_model_name_or_path: Optional[Union[str, os.PathLike]], *model_args, **kwargs):
-        assert len(model_args) == 0 and len(kwargs) == 0, "extra args is currently not supported"
+    def from_pretrained(
+        cls,
+        pretrained_model_name_or_path: Optional[Union[str, os.PathLike]],
+        *model_args,
+        **kwargs,
+    ):
+        assert (
+            len(model_args) == 0 and len(kwargs) == 0
+        ), "extra args is currently not supported"
         if isinstance(pretrained_model_name_or_path, str):
             pretrained_model_name_or_path = Path(pretrained_model_name_or_path)
 
-        pretrained_model_name_or_path = Path(f'{shared.args.model_dir}') / Path(pretrained_model_name_or_path)
+        pretrained_model_name_or_path = Path(f"{shared.args.model_dir}") / Path(
+            pretrained_model_name_or_path
+        )
 
         return Exllamav3HF(pretrained_model_name_or_path)
 
     def unload(self):
         """Properly unload the ExllamaV3 model and free GPU memory."""
-        if hasattr(self, 'ex_model') and self.ex_model is not None:
+        if hasattr(self, "ex_model") and self.ex_model is not None:
             self.ex_model.unload()
             self.ex_model = None
 
-        if hasattr(self, 'ex_cache') and self.ex_cache is not None:
+        if hasattr(self, "ex_cache") and self.ex_cache is not None:
             self.ex_cache = None
 
         # Clean up any additional ExllamaV3 resources
-        if hasattr(self, 'past_seq'):
+        if hasattr(self, "past_seq"):
             self.past_seq = None
-        if hasattr(self, 'past_seq_negative'):
+        if hasattr(self, "past_seq_negative"):
             self.past_seq_negative = None
-        if hasattr(self, 'ex_cache_negative'):
+        if hasattr(self, "ex_cache_negative"):
             self.ex_cache_negative = None

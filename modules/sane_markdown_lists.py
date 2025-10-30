@@ -27,7 +27,7 @@ from markdown.blockparser import BlockParser
 from markdown.blockprocessors import (
     ListIndentProcessor,
     OListProcessor,
-    ParagraphProcessor
+    ParagraphProcessor,
 )
 
 if TYPE_CHECKING:  # pragma: no cover
@@ -40,7 +40,7 @@ assert MIN_NESTED_LIST_INDENT > 1, "'MIN_NESTED_LIST_INDENT' must be > 1"
 
 
 class SaneListIndentProcessor(ListIndentProcessor):
-    """ Process children of list items.
+    """Process children of list items.
 
     Example
 
@@ -53,24 +53,31 @@ class SaneListIndentProcessor(ListIndentProcessor):
 
     def __init__(self, *args):
         super().__init__(*args)
-        self.INDENT_RE = re.compile(r'^(([ ])+)')
+        self.INDENT_RE = re.compile(r"^(([ ])+)")
 
     def test(self, parent: etree.Element, block: str) -> bool:
-        return block.startswith(' ' * MIN_NESTED_LIST_INDENT) and \
-            not self.parser.state.isstate('detabbed') and \
-            (parent.tag in self.ITEM_TYPES or
-                (len(parent) and parent[-1] is not None and
-                    (parent[-1].tag in self.LIST_TYPES)))
+        return (
+            block.startswith(" " * MIN_NESTED_LIST_INDENT)
+            and not self.parser.state.isstate("detabbed")
+            and (
+                parent.tag in self.ITEM_TYPES
+                or (
+                    len(parent)
+                    and parent[-1] is not None
+                    and (parent[-1].tag in self.LIST_TYPES)
+                )
+            )
+        )
 
     def get_level(self, parent: etree.Element, block: str) -> tuple[int, etree.Element]:
-        """ Get level of indentation based on list level. """
+        """Get level of indentation based on list level."""
         # Get indent level
         m = self.INDENT_RE.match(block)
         if m:
             indent_level = len(m.group(1)) / MIN_NESTED_LIST_INDENT
         else:
             indent_level = 0
-        if self.parser.state.isstate('list'):
+        if self.parser.state.isstate("list"):
             # We're in a tight-list - so we already are at correct parent.
             level = 1
         else:
@@ -79,8 +86,9 @@ class SaneListIndentProcessor(ListIndentProcessor):
         # Step through children of tree to find matching indent level.
         while indent_level > level:
             child = self.lastChild(parent)
-            if (child is not None and
-                    (child.tag in self.LIST_TYPES or child.tag in self.ITEM_TYPES)):
+            if child is not None and (
+                child.tag in self.LIST_TYPES or child.tag in self.ITEM_TYPES
+            ):
                 if child.tag in self.LIST_TYPES:
                     level += 1
                 parent = child
@@ -91,33 +99,33 @@ class SaneListIndentProcessor(ListIndentProcessor):
         return level, parent
 
     def detab(self, text: str, length: int | None = None) -> tuple[str, str]:
-        """ Remove a tab from the front of each line of the given text. """
+        """Remove a tab from the front of each line of the given text."""
         if length is None:
             length = MIN_NESTED_LIST_INDENT
         newtext = []
-        lines = text.split('\n')
+        lines = text.split("\n")
         for line in lines:
-            if line.startswith(' ' * length):
+            if line.startswith(" " * length):
                 newtext.append(line[length:])
             elif not line.strip():
-                newtext.append('')
+                newtext.append("")
             else:
                 break
-        return '\n'.join(newtext), '\n'.join(lines[len(newtext):])
+        return "\n".join(newtext), "\n".join(lines[len(newtext) :])
 
     def looseDetab(self, text: str, level: int = 1) -> str:
-        """ Remove indentation from front of lines but allowing dedented lines. """
-        lines = text.split('\n')
+        """Remove indentation from front of lines but allowing dedented lines."""
+        lines = text.split("\n")
         for i in range(len(lines)):
-            if lines[i].startswith(' ' * MIN_NESTED_LIST_INDENT * level):
-                lines[i] = lines[i][MIN_NESTED_LIST_INDENT * level:]
-        return '\n'.join(lines)
+            if lines[i].startswith(" " * MIN_NESTED_LIST_INDENT * level):
+                lines[i] = lines[i][MIN_NESTED_LIST_INDENT * level :]
+        return "\n".join(lines)
 
 
 class SaneOListProcessor(OListProcessor):
-    """ Override `SIBLING_TAGS` to not include `ul` and set `LAZY_OL` to `False`. """
+    """Override `SIBLING_TAGS` to not include `ul` and set `LAZY_OL` to `False`."""
 
-    SIBLING_TAGS = ['ol']
+    SIBLING_TAGS = ["ol"]
     """ Exclude `ul` from list of siblings. """
     LAZY_OL = False
     """ Disable lazy list behavior. """
@@ -128,12 +136,18 @@ class SaneOListProcessor(OListProcessor):
         # which automatically matches blocks with an indent = self.tab_length
         max_list_start_indent = self.tab_length - 1
         # Detect an item (e.g., `1. item`)
-        self.RE = re.compile(r'^[ ]{0,%d}[\*_]{0,2}\d+\.[ ]+(.*)' % max_list_start_indent)
+        self.RE = re.compile(
+            r"^[ ]{0,%d}[\*_]{0,2}\d+\.[ ]+(.*)" % max_list_start_indent
+        )
         # Detect items on secondary lines. they can be of either list type.
-        self.CHILD_RE = re.compile(r'^[ ]{0,%d}([\*_]{0,2})((\d+\.))[ ]+(.*)' % (MIN_NESTED_LIST_INDENT - 1))
+        self.CHILD_RE = re.compile(
+            r"^[ ]{0,%d}([\*_]{0,2})((\d+\.))[ ]+(.*)" % (MIN_NESTED_LIST_INDENT - 1)
+        )
         # Detect indented (nested) items of either type
-        self.INDENT_RE = re.compile(r'^[ ]{%d,%d}[\*_]{0,2}((\d+\.)|[*+-])[ ]+.*' %
-                                    (MIN_NESTED_LIST_INDENT, self.tab_length * 2 - 1))
+        self.INDENT_RE = re.compile(
+            r"^[ ]{%d,%d}[\*_]{0,2}((\d+\.)|[*+-])[ ]+.*"
+            % (MIN_NESTED_LIST_INDENT, self.tab_length * 2 - 1)
+        )
 
     def run(self, parent: etree.Element, blocks: list[str]) -> None:
         # Check for multiple items in one block.
@@ -149,25 +163,25 @@ class SaneOListProcessor(OListProcessor):
                 # since it's possible there are other children for this
                 # sibling, we can't just `SubElement` the `p`, we need to
                 # insert it as the first item.
-                p = etree.Element('p')
+                p = etree.Element("p")
                 p.text = lst[-1].text
-                lst[-1].text = ''
+                lst[-1].text = ""
                 lst[-1].insert(0, p)
             # if the last item has a tail, then the tail needs to be put in a `p`
             # likely only when a header is not followed by a blank line
             lch = self.lastChild(lst[-1])
             if lch is not None and lch.tail:
-                p = etree.SubElement(lst[-1], 'p')
+                p = etree.SubElement(lst[-1], "p")
                 p.text = lch.tail.lstrip()
-                lch.tail = ''
+                lch.tail = ""
 
             # parse first block differently as it gets wrapped in a `p`.
-            li = etree.SubElement(lst, 'li')
-            self.parser.state.set('looselist')
+            li = etree.SubElement(lst, "li")
+            self.parser.state.set("looselist")
             firstitem = items.pop(0)
             self.parser.parseBlocks(li, [firstitem])
             self.parser.state.reset()
-        elif parent.tag in ['ol', 'ul']:
+        elif parent.tag in ["ol", "ul"]:
             # this catches the edge case of a multi-item indented list whose
             # first item is in a blank parent-list item:
             #     * * subitem1
@@ -178,10 +192,10 @@ class SaneOListProcessor(OListProcessor):
             # This is a new list so create parent with appropriate tag.
             lst = etree.SubElement(parent, self.TAG)
             # Check if a custom start integer is set
-            if not self.LAZY_OL and self.STARTSWITH != '1':
-                lst.attrib['start'] = self.STARTSWITH
+            if not self.LAZY_OL and self.STARTSWITH != "1":
+                lst.attrib["start"] = self.STARTSWITH
 
-        self.parser.state.set('list')
+        self.parser.state.set("list")
         # Loop through items in block, recursively parsing each with the
         # appropriate parent.
         for item in items:
@@ -190,88 +204,90 @@ class SaneOListProcessor(OListProcessor):
                 self.parser.parseBlocks(lst[-1], [item])
             else:
                 # New item. Create `li` and parse with it as parent
-                li = etree.SubElement(lst, 'li')
+                li = etree.SubElement(lst, "li")
                 self.parser.parseBlocks(li, [item])
         self.parser.state.reset()
 
     def looseDetab(self, text: str, indent_length: int, level: int = 1) -> str:
-        """ Remove indentation from front of lines but allowing dedented lines. """
-        lines = text.split('\n')
+        """Remove indentation from front of lines but allowing dedented lines."""
+        lines = text.split("\n")
         for i in range(len(lines)):
-            if lines[i].startswith(' ' * indent_length * level):
-                lines[i] = lines[i][indent_length * level:]
-        return '\n'.join(lines)
+            if lines[i].startswith(" " * indent_length * level):
+                lines[i] = lines[i][indent_length * level :]
+        return "\n".join(lines)
 
     def get_items(self, block: str) -> list[str]:
-        """ Break a block into list items. """
+        """Break a block into list items."""
         # If first level of list is indented, remove that indentation
         if (indent_len := len(block) - len(block.lstrip())) > 0:
             block = self.looseDetab(block, indent_len)
         items = []
-        for line in block.split('\n'):
+        for line in block.split("\n"):
             m = self.CHILD_RE.match(line)
             if m:
                 # This is a new list item
                 # Check first item for the start index
                 if not items:
                     # Detect the integer value of first list item
-                    INTEGER_RE = re.compile(r'(\d+)')
+                    INTEGER_RE = re.compile(r"(\d+)")
                     self.STARTSWITH = INTEGER_RE.match(m.group(2)).group()
                 # Append to the list
                 items.append(m.group(1) + m.group(4))
             elif self.INDENT_RE.match(line):
                 # This is an indented (possibly nested) item.
-                if items[-1].startswith(' ' * MIN_NESTED_LIST_INDENT):
+                if items[-1].startswith(" " * MIN_NESTED_LIST_INDENT):
                     # Previous item was indented. Append to that item.
-                    items[-1] = '{}\n{}'.format(items[-1], line)
+                    items[-1] = "{}\n{}".format(items[-1], line)
                 else:
                     items.append(line)
             else:
                 # This is another line of previous item. Append to that item.
-                items[-1] = '{}\n{}'.format(items[-1], line)
+                items[-1] = "{}\n{}".format(items[-1], line)
         return items
 
 
 class SaneUListProcessor(SaneOListProcessor):
-    """ Override `SIBLING_TAGS` to not include `ol`. """
+    """Override `SIBLING_TAGS` to not include `ol`."""
 
-    TAG: str = 'ul'
-    SIBLING_TAGS = ['ul']
+    TAG: str = "ul"
+    SIBLING_TAGS = ["ul"]
     """ Exclude `ol` from list of siblings. """
 
     def __init__(self, parser: blockparser.BlockParser):
         super().__init__(parser)
         # Detect an item (e.g., `- item` or `+ item` or `* item`).
         max_list_start_indent = self.tab_length - 1
-        self.RE = re.compile(r'^[ ]{0,%d}[*+-][ ]+(.*)' % max_list_start_indent)
-        self.CHILD_RE = re.compile(r'^[ ]{0,%d}(([*+-]))[ ]+(.*)' % (MIN_NESTED_LIST_INDENT - 1))
+        self.RE = re.compile(r"^[ ]{0,%d}[*+-][ ]+(.*)" % max_list_start_indent)
+        self.CHILD_RE = re.compile(
+            r"^[ ]{0,%d}(([*+-]))[ ]+(.*)" % (MIN_NESTED_LIST_INDENT - 1)
+        )
 
     def get_items(self, block: str) -> list[str]:
-        """ Break a block into list items. """
+        """Break a block into list items."""
         # If first level of list is indented, remove that indentation
         if (indent_len := len(block) - len(block.lstrip())) > 0:
             block = self.looseDetab(block, indent_len)
         items = []
-        for line in block.split('\n'):
+        for line in block.split("\n"):
             m = self.CHILD_RE.match(line)
             if m:
                 # Append to the list
                 items.append(m.group(3))
             elif self.INDENT_RE.match(line):
                 # This is an indented (possibly nested) item.
-                if items[-1].startswith(' ' * MIN_NESTED_LIST_INDENT):
+                if items[-1].startswith(" " * MIN_NESTED_LIST_INDENT):
                     # Previous item was indented. Append to that item.
-                    items[-1] = '{}\n{}'.format(items[-1], line)
+                    items[-1] = "{}\n{}".format(items[-1], line)
                 else:
                     items.append(line)
             else:
                 # This is another line of previous item. Append to that item.
-                items[-1] = '{}\n{}'.format(items[-1], line)
+                items[-1] = "{}\n{}".format(items[-1], line)
         return items
 
 
 class SaneParagraphProcessor(ParagraphProcessor):
-    """ Process Paragraph blocks. """
+    """Process Paragraph blocks."""
 
     def __init__(self, parser: BlockParser):
         super().__init__(parser)
@@ -282,7 +298,7 @@ class SaneParagraphProcessor(ParagraphProcessor):
         block = blocks.pop(0)
         if block.strip():
             # Not a blank block. Add to parent, otherwise throw it away.
-            if self.parser.state.isstate('list'):
+            if self.parser.state.isstate("list"):
                 # The parent is a tight-list.
                 #
                 # Check for any children. This will likely only happen in a
@@ -295,13 +311,13 @@ class SaneParagraphProcessor(ParagraphProcessor):
                 if sibling is not None:
                     # Insert after sibling.
                     if sibling.tail:
-                        sibling.tail = '{}\n{}'.format(sibling.tail, block)
+                        sibling.tail = "{}\n{}".format(sibling.tail, block)
                     else:
-                        sibling.tail = '\n%s' % block
+                        sibling.tail = "\n%s" % block
                 else:
                     # Append to parent.text
                     if parent.text:
-                        parent.text = '{}\n{}'.format(parent.text, block)
+                        parent.text = "{}\n{}".format(parent.text, block)
                     else:
                         parent.text = block.lstrip()
             else:
@@ -313,7 +329,7 @@ class SaneParagraphProcessor(ParagraphProcessor):
                     block = block[:list_start]
 
                 # Create a regular paragraph
-                p = etree.SubElement(parent, 'p')
+                p = etree.SubElement(parent, "p")
                 p.text = block.lstrip()
 
                 # If a list was found, parse its block separately with the paragraph as the parent
@@ -322,14 +338,18 @@ class SaneParagraphProcessor(ParagraphProcessor):
 
 
 class SaneListExtension(Extension):
-    """ Add sane lists to Markdown. """
+    """Add sane lists to Markdown."""
 
     def extendMarkdown(self, md):
-        """ Override existing Processors. """
-        md.parser.blockprocessors.register(SaneListIndentProcessor(md.parser), 'indent', 90)
-        md.parser.blockprocessors.register(SaneOListProcessor(md.parser), 'olist', 40)
-        md.parser.blockprocessors.register(SaneUListProcessor(md.parser), 'ulist', 30)
-        md.parser.blockprocessors.register(SaneParagraphProcessor(md.parser), 'paragraph', 10)
+        """Override existing Processors."""
+        md.parser.blockprocessors.register(
+            SaneListIndentProcessor(md.parser), "indent", 90
+        )
+        md.parser.blockprocessors.register(SaneOListProcessor(md.parser), "olist", 40)
+        md.parser.blockprocessors.register(SaneUListProcessor(md.parser), "ulist", 30)
+        md.parser.blockprocessors.register(
+            SaneParagraphProcessor(md.parser), "paragraph", 10
+        )
 
 
 def makeExtension(**kwargs):  # pragma: no cover

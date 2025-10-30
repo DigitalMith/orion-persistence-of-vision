@@ -1,7 +1,7 @@
-'''
+"""
 Most of the code here was adapted from:
 https://github.com/AUTOMATIC1111/stable-diffusion-webui/pull/14184
-'''
+"""
 
 import inspect
 import warnings
@@ -23,8 +23,7 @@ def create_app_with_trustedhost(*args, **kwargs):
 
     if not (shared.args.listen or shared.args.share):
         app.add_middleware(
-            TrustedHostMiddleware,
-            allowed_hosts=["localhost", "127.0.0.1"]
+            TrustedHostMiddleware, allowed_hosts=["localhost", "127.0.0.1"]
         )
 
     return app
@@ -39,11 +38,13 @@ class GradioDeprecationWarning(DeprecationWarning):
 
 
 def repair(grclass):
-    if not getattr(grclass, 'EVENTS', None):
+    if not getattr(grclass, "EVENTS", None):
         return
 
     @wraps(grclass.__init__)
-    def __repaired_init__(self, *args, tooltip=None, source=None, original=grclass.__init__, **kwargs):
+    def __repaired_init__(
+        self, *args, tooltip=None, source=None, original=grclass.__init__, **kwargs
+    ):
         if source:
             kwargs["sources"] = [source]
 
@@ -53,7 +54,11 @@ def repair(grclass):
             if k in allowed_kwargs:
                 fixed_kwargs[k] = v
             else:
-                warnings.warn(f"unexpected argument for {grclass.__name__}: {k}", GradioDeprecationWarning, stacklevel=2)
+                warnings.warn(
+                    f"unexpected argument for {grclass.__name__}: {k}",
+                    GradioDeprecationWarning,
+                    stacklevel=2,
+                )
 
         original(self, *args, **fixed_kwargs)
 
@@ -64,7 +69,7 @@ def repair(grclass):
 
             def fun(*xargs, _js=None, replaced_event=replaced_event, **xkwargs):
                 if _js:
-                    xkwargs['js'] = _js
+                    xkwargs["js"] = _js
 
                 return replaced_event(*xargs, **xkwargs)
 
@@ -84,7 +89,7 @@ class Dependency(gr.events.Dependency):
 
         def then(*xargs, _js=None, **xkwargs):
             if _js:
-                xkwargs['js'] = _js
+                xkwargs["js"] = _js
 
             return original_then(*xargs, **xkwargs)
 

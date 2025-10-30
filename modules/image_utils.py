@@ -2,6 +2,7 @@
 Shared image processing utilities for multimodal support.
 Used by both ExLlamaV3 and llama.cpp implementations.
 """
+
 import base64
 import io
 from typing import Any, List, Tuple
@@ -17,14 +18,14 @@ def convert_pil_to_base64(image: Image.Image) -> str:
     # Save image to an in-memory bytes buffer in PNG format
     image.save(buffered, format="PNG")
     # Encode the bytes to a base64 string
-    return base64.b64encode(buffered.getvalue()).decode('utf-8')
+    return base64.b64encode(buffered.getvalue()).decode("utf-8")
 
 
 def decode_base64_image(base64_string: str) -> Image.Image:
     """Decodes a base64 string to a PIL Image."""
     try:
-        if base64_string.startswith('data:image/'):
-            base64_string = base64_string.split(',', 1)[1]
+        if base64_string.startswith("data:image/"):
+            base64_string = base64_string.split(",", 1)[1]
 
         image_data = base64.b64decode(base64_string)
         image = Image.open(io.BytesIO(image_data))
@@ -49,22 +50,23 @@ def process_message_content(content: Any) -> Tuple[str, List[Image.Image]]:
             if not isinstance(item, dict):
                 continue
 
-            item_type = item.get('type', '')
-            if item_type == 'text':
-                text_parts.append(item.get('text', ''))
-            elif item_type == 'image_url':
-                image_url_data = item.get('image_url', {})
-                image_url = image_url_data.get('url', '')
+            item_type = item.get("type", "")
+            if item_type == "text":
+                text_parts.append(item.get("text", ""))
+            elif item_type == "image_url":
+                image_url_data = item.get("image_url", {})
+                image_url = image_url_data.get("url", "")
 
-                if image_url.startswith('data:image/'):
+                if image_url.startswith("data:image/"):
                     try:
                         images.append(decode_base64_image(image_url))
                     except Exception as e:
                         logger.warning(f"Failed to process a base64 image: {e}")
-                elif image_url.startswith('http'):
+                elif image_url.startswith("http"):
                     # Support external URLs
                     try:
                         import requests
+
                         response = requests.get(image_url, timeout=10)
                         response.raise_for_status()
                         image_data = response.content
@@ -76,20 +78,22 @@ def process_message_content(content: Any) -> Tuple[str, List[Image.Image]]:
                 else:
                     logger.warning(f"Unsupported image URL format: {image_url[:70]}...")
 
-        return ' '.join(text_parts), images
+        return " ".join(text_parts), images
 
     return str(content), []
 
 
-def convert_image_attachments_to_pil(image_attachments: List[dict]) -> List[Image.Image]:
+def convert_image_attachments_to_pil(
+    image_attachments: List[dict],
+) -> List[Image.Image]:
     """Convert webui image_attachments format to PIL Images."""
     pil_images = []
     for attachment in image_attachments:
-        if attachment.get('type') == 'image' and 'image_data' in attachment:
+        if attachment.get("type") == "image" and "image_data" in attachment:
             try:
-                image = decode_base64_image(attachment['image_data'])
-                if image.mode != 'RGB':
-                    image = image.convert('RGB')
+                image = decode_base64_image(attachment["image_data"])
+                if image.mode != "RGB":
+                    image = image.convert("RGB")
                 pil_images.append(image)
             except Exception as e:
                 logger.warning(f"Failed to process image attachment: {e}")
@@ -100,7 +104,7 @@ def convert_openai_messages_to_images(messages: List[dict]) -> List[Image.Image]
     """Convert OpenAI messages format to PIL Images."""
     all_images = []
     for message in messages:
-        if isinstance(message, dict) and 'content' in message:
-            _, images = process_message_content(message['content'])
+        if isinstance(message, dict) and "content" in message:
+            _, images = process_message_content(message["content"])
             all_images.extend(images)
     return all_images

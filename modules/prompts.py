@@ -11,22 +11,22 @@ def load_prompt(fname):
         prompt_path = Path("user_data/logs/notebook") / f"{new_name}.txt"
         prompt_path.parent.mkdir(parents=True, exist_ok=True)
         initial_content = "In this story,"
-        prompt_path.write_text(initial_content, encoding='utf-8')
+        prompt_path.write_text(initial_content, encoding="utf-8")
 
         # Update settings to point to new file
-        shared.settings['prompt-notebook'] = new_name
+        shared.settings["prompt-notebook"] = new_name
 
         return initial_content
 
-    file_path = Path(f'user_data/logs/notebook/{fname}.txt')
+    file_path = Path(f"user_data/logs/notebook/{fname}.txt")
     if file_path.exists():
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, "r", encoding="utf-8") as f:
             text = f.read()
             text = text.rstrip()
 
             return text
     else:
-        return ''
+        return ""
 
 
 def count_tokens(text):
@@ -34,4 +34,4 @@ def count_tokens(text):
         tokens = get_encoded_length(text)
         return str(tokens)
     except:
-        return '0'
+        return "0"

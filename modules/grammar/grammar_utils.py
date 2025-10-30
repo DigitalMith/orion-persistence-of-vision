@@ -1,4 +1,4 @@
-'''
+"""
 This file has been 100% copied from this PR to the Transformers library:
 https://github.com/huggingface/transformers/pull/27557
 
@@ -6,7 +6,7 @@ Author: Saibo-creator
 Author GitHub: https://github.com/Saibo-creator
 
 All credits go to the author.
-'''
+"""
 
 import logging
 import re
@@ -188,7 +188,9 @@ def parse_sequence(state, src, rule_name, outbuf, is_nested):
             # parse nested alternates into synthesized rule
             remaining_src = remove_leading_white_space(remaining_src[1:], True)
             sub_rule_id = generate_symbol_id(state, rule_name)
-            remaining_src = parse_alternates(state, remaining_src, rule_name, sub_rule_id, True)
+            remaining_src = parse_alternates(
+                state, remaining_src, rule_name, sub_rule_id, True
+            )
             last_sym_start = len(outbuf)
             # output reference to synthesized rule
             outbuf.append(REF_RULE_MARKER)
@@ -198,7 +200,9 @@ def parse_sequence(state, src, rule_name, outbuf, is_nested):
             remaining_src = remove_leading_white_space(remaining_src[1:], is_nested)
         elif remaining_src[0] in ("*", "+", "?"):  # repetition operator
             if len(outbuf) - out_start_pos - 1 == 0:
-                raise RuntimeError("expecting preceeding item to */+/? at " + remaining_src)
+                raise RuntimeError(
+                    "expecting preceeding item to */+/? at " + remaining_src
+                )
             out_grammar = state.grammar_encoding
 
             # apply transformation to previous symbol (last_sym_start -
@@ -251,7 +255,9 @@ def parse_alternates(state, src, rule_name, rule_id, is_nested):
     remaining_src = parse_sequence(state, src, rule_name, outbuf, is_nested)
     while remaining_src and remaining_src[0] == "|":
         remaining_src = remove_leading_white_space(remaining_src[1:], True)
-        remaining_src = parse_sequence(state, remaining_src, rule_name, outbuf, is_nested)
+        remaining_src = parse_sequence(
+            state, remaining_src, rule_name, outbuf, is_nested
+        )
 
     state.grammar_encoding.append(rule_id)
     state.grammar_encoding.extend(outbuf)
@@ -271,7 +277,9 @@ def parse_rule(state, src):
     remaining_src = parse_alternates(state, remaining_src, name, rule_id, False)
 
     if remaining_src and remaining_src[0] == "\r":
-        remaining_src = remaining_src[2:] if remaining_src[1] == "\n" else remaining_src[1:]
+        remaining_src = (
+            remaining_src[2:] if remaining_src[1] == "\n" else remaining_src[1:]
+        )
     elif remaining_src and remaining_src[0] == "\n":
         remaining_src = remaining_src[1:]
     elif remaining_src:
@@ -287,7 +295,9 @@ def parse_ebnf(src):
         while grammar_repr:
             if last_grammar_repr:
                 last_parsed_rule_len = len(last_grammar_repr) - len(grammar_repr)
-                logger.debug(f"last_parsed_rule: {last_grammar_repr[:last_parsed_rule_len]}")
+                logger.debug(
+                    f"last_parsed_rule: {last_grammar_repr[:last_parsed_rule_len]}"
+                )
             last_grammar_repr = grammar_repr
             grammar_repr = parse_rule(state, grammar_repr)
         state.grammar_encoding.append(0xFFFF)
@@ -320,9 +330,15 @@ def print_rule(file, grammar_encoding, index, symbol_id_names):
                 pos += 1
 
                 for i in range(0, num_chars, 2):
-                    print("{}-".format(chr(grammar_encoding[pos + i])), end="", file=file)
+                    print(
+                        "{}-".format(chr(grammar_encoding[pos + i])), end="", file=file
+                    )
                     if i + 1 < num_chars:
-                        print("{}".format(chr(grammar_encoding[pos + i + 1])), end="", file=file)
+                        print(
+                            "{}".format(chr(grammar_encoding[pos + i + 1])),
+                            end="",
+                            file=file,
+                        )
                 print("]", end=" ", file=file)
                 pos += num_chars
         pos += 1
@@ -477,10 +493,16 @@ class IncrementalGrammarConstraint(GrammarConstraint):
             pos += 1
             found = False
             for i in range(0, num_chars, 2):
-                if self.grammar_encoding[pos + i] <= byte and byte <= self.grammar_encoding[pos + i + 1]:
+                if (
+                    self.grammar_encoding[pos + i] <= byte
+                    and byte <= self.grammar_encoding[pos + i + 1]
+                ):
                     found = True
                     break
-                if self.grammar_encoding[pos + i] >= byte and byte >= self.grammar_encoding[pos + i + 1]:
+                if (
+                    self.grammar_encoding[pos + i] >= byte
+                    and byte >= self.grammar_encoding[pos + i + 1]
+                ):
                     found = True
                     break
             if not found:
@@ -517,7 +539,9 @@ class IncrementalGrammarConstraint(GrammarConstraint):
 
         return stacks
 
-    def accept_token_ids(self, token_ids: List[int], stacks: List[List[int]], as_string=True):
+    def accept_token_ids(
+        self, token_ids: List[int], stacks: List[List[int]], as_string=True
+    ):
         if as_string:
             string = self.tokenizer.decode(token_ids)
             stacks = self.accept_string(string, stacks)
@@ -540,7 +564,9 @@ class IncrementalGrammarConstraint(GrammarConstraint):
             logger.debug(f"sum of acceptance: {0}")
             return torch.zeros(vocab_size, dtype=torch.bool, device=device)
 
-        acceptance_matrix = torch.cat([self.token_acceptance_for_stack(tuple(stack), device) for stack in stacks])
+        acceptance_matrix = torch.cat(
+            [self.token_acceptance_for_stack(tuple(stack), device) for stack in stacks]
+        )
         # Merge stacks: any True => True
         acceptance = acceptance_matrix.reshape(len(stacks), -1).any(dim=0)
         logger.debug(f"sum of acceptance: {acceptance.sum()}")
@@ -662,7 +688,9 @@ class TokenTrie:
             def fmt_token(id):
                 if id in special:
                     return None
-                return bytes(tokenizer.decode([id], clean_up_tokenization_spaces=False), "utf-8")
+                return bytes(
+                    tokenizer.decode([id], clean_up_tokenization_spaces=False), "utf-8"
+                )
 
         elif "llama" in tokenizer.__class__.__name__.lower():
 
@@ -697,4 +725,6 @@ class TokenTrie:
 
 @lru_cache(maxsize=5)
 def initialize_grammar(grammar_string):
-    return IncrementalGrammarConstraint(grammar_string.strip(), start_rule_name="root", tokenizer=shared.tokenizer)
+    return IncrementalGrammarConstraint(
+        grammar_string.strip(), start_rule_name="root", tokenizer=shared.tokenizer
+    )

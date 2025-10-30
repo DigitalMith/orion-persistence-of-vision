@@ -10,19 +10,19 @@ last_generation_time = time.time()
 
 
 def load_model(model_name, loader=None):
-    logger.info(f"Loading \"{model_name}\"")
+    logger.info(f'Loading "{model_name}"')
     t0 = time.time()
 
     shared.is_seq2seq = False
     shared.model_name = model_name
     load_func_map = {
-        'llama.cpp': llama_cpp_server_loader,
-        'Transformers': transformers_loader,
-        'ExLlamav3_HF': ExLlamav3_HF_loader,
-        'ExLlamav3': ExLlamav3_loader,
-        'ExLlamav2_HF': ExLlamav2_HF_loader,
-        'ExLlamav2': ExLlamav2_loader,
-        'TensorRT-LLM': TensorRT_LLM_loader,
+        "llama.cpp": llama_cpp_server_loader,
+        "Transformers": transformers_loader,
+        "ExLlamav3_HF": ExLlamav3_HF_loader,
+        "ExLlamav3": ExLlamav3_loader,
+        "ExLlamav2_HF": ExLlamav2_HF_loader,
+        "ExLlamav2": ExLlamav2_loader,
+        "TensorRT-LLM": TensorRT_LLM_loader,
     }
 
     metadata = get_model_metadata(model_name)
@@ -30,13 +30,14 @@ def load_model(model_name, loader=None):
         if shared.args.loader is not None:
             loader = shared.args.loader
         else:
-            loader = metadata['loader']
+            loader = metadata["loader"]
             if loader is None:
-                logger.error('The path to the model does not exist. Exiting.')
+                logger.error("The path to the model does not exist. Exiting.")
                 raise ValueError
 
-    if loader != 'llama.cpp' and 'sampler_hijack' not in sys.modules:
+    if loader != "llama.cpp" and "sampler_hijack" not in sys.modules:
         from modules import sampler_hijack
+
         sampler_hijack.hijack_samplers()
 
     shared.args.loader = loader
@@ -47,21 +48,26 @@ def load_model(model_name, loader=None):
         model = output
         if model is not None:
             from modules.transformers_loader import load_tokenizer
+
             tokenizer = load_tokenizer(model_name)
 
     if model is None:
         return None, None
 
     shared.settings.update({k: v for k, v in metadata.items() if k in shared.settings})
-    if loader.lower().startswith('exllama') or loader.lower().startswith('tensorrt') or loader == 'llama.cpp':
-        shared.settings['truncation_length'] = shared.args.ctx_size
+    if (
+        loader.lower().startswith("exllama")
+        or loader.lower().startswith("tensorrt")
+        or loader == "llama.cpp"
+    ):
+        shared.settings["truncation_length"] = shared.args.ctx_size
 
     shared.is_multimodal = False
-    if loader.lower() in ('exllamav3', 'llama.cpp') and hasattr(model, 'is_multimodal'):
+    if loader.lower() in ("exllamav3", "llama.cpp") and hasattr(model, "is_multimodal"):
         shared.is_multimodal = model.is_multimodal()
 
-    logger.info(f"Loaded \"{model_name}\" in {(time.time()-t0):.2f} seconds.")
-    logger.info(f"LOADER: \"{loader}\"")
+    logger.info(f'Loaded "{model_name}" in {(time.time()-t0):.2f} seconds.')
+    logger.info(f'LOADER: "{loader}"')
     logger.info(f"TRUNCATION LENGTH: {shared.settings['truncation_length']}")
     logger.info(f"INSTRUCTION TEMPLATE: \"{metadata['instruction_template']}\"")
     return model, tokenizer
@@ -75,7 +81,7 @@ def llama_cpp_server_loader(model_name):
     if path.is_file():
         model_file = path
     else:
-        gguf_files = sorted(path.glob('*.gguf'))
+        gguf_files = sorted(path.glob("*.gguf"))
         if not gguf_files:
             logger.error(f"No .gguf models found in the directory: {path}")
             return None, None
@@ -92,6 +98,7 @@ def llama_cpp_server_loader(model_name):
 
 def transformers_loader(model_name):
     from modules.transformers_loader import load_model_HF
+
     return load_model_HF(model_name)
 
 
@@ -125,7 +132,9 @@ def TensorRT_LLM_loader(model_name):
     try:
         from modules.tensorrt_llm import TensorRTLLMModel
     except ModuleNotFoundError:
-        raise ModuleNotFoundError("Failed to import 'tensorrt_llm'. Please install it manually following the instructions in the TensorRT-LLM GitHub repository.")
+        raise ModuleNotFoundError(
+            "Failed to import 'tensorrt_llm'. Please install it manually following the instructions in the TensorRT-LLM GitHub repository."
+        )
 
     model = TensorRTLLMModel.from_pretrained(model_name)
     return model
@@ -136,11 +145,13 @@ def unload_model(keep_model_name=False):
         return
 
     model_class_name = shared.model.__class__.__name__
-    is_llamacpp = (model_class_name == 'LlamaServer')
+    is_llamacpp = model_class_name == "LlamaServer"
 
-    if model_class_name in ['Exllamav3Model', 'Exllamav3HF']:
+    if model_class_name in ["Exllamav3Model", "Exllamav3HF"]:
         shared.model.unload()
-    elif model_class_name in ['Exllamav2Model', 'Exllamav2HF'] and hasattr(shared.model, 'unload'):
+    elif model_class_name in ["Exllamav2Model", "Exllamav2HF"] and hasattr(
+        shared.model, "unload"
+    ):
         shared.model.unload()
 
     shared.model = shared.tokenizer = None
@@ -149,10 +160,11 @@ def unload_model(keep_model_name=False):
 
     if not is_llamacpp:
         from modules.torch_utils import clear_torch_cache
+
         clear_torch_cache()
 
     if not keep_model_name:
-        shared.model_name = 'None'
+        shared.model_name = "None"
 
 
 def reload_model():
@@ -163,7 +175,9 @@ def reload_model():
 def unload_model_if_idle():
     global last_generation_time
 
-    logger.info(f"Setting a timeout of {shared.args.idle_timeout} minutes to unload the model in case of inactivity.")
+    logger.info(
+        f"Setting a timeout of {shared.args.idle_timeout} minutes to unload the model in case of inactivity."
+    )
 
     while True:
         shared.generation_lock.acquire()

@@ -1,10 +1,4 @@
-import torch
 from modules import chat, shared
-from modules.text_generation import (
-    decode,
-    encode,
-    generate_reply,
-)
 from transformers import LogitsProcessor
 import gradio as gr
 

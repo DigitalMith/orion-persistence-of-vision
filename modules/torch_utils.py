@@ -8,19 +8,20 @@ from modules import shared
 
 
 def get_device():
-    if hasattr(shared.model, 'device'):
+    if hasattr(shared.model, "device"):
         return shared.model.device
     elif torch.cuda.is_available():
-        return torch.device('cuda')
+        return torch.device("cuda")
     elif shared.args.deepspeed:
         import deepspeed
+
         return deepspeed.get_accelerator().current_device_name()
     elif torch.backends.mps.is_available():
-        return torch.device('mps')
+        return torch.device("mps")
     elif is_torch_xpu_available():
-        return torch.device('xpu:0')
+        return torch.device("xpu:0")
     elif is_torch_npu_available():
-        return torch.device('npu:0')
+        return torch.device("npu:0")
     else:
         return None
 
@@ -35,5 +36,5 @@ def clear_torch_cache():
         elif is_npu_available():
             torch.npu.empty_cache()
         elif torch.backends.mps.is_available():
-            if hasattr(torch.backends.mps, 'empty_cache'):
+            if hasattr(torch.backends.mps, "empty_cache"):
                 torch.backends.mps.empty_cache()

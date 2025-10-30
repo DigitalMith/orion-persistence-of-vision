@@ -7,16 +7,9 @@ functions are declared in the same order that they are called at
 generation time.
 """
 
-import gradio as gr
-import torch
 from transformers import LogitsProcessor
 
-from modules import chat, shared
-from modules.text_generation import (
-    decode,
-    encode,
-    generate_reply,
-)
+from modules import chat
 
 params = {
     "display_name": "Example Extension",

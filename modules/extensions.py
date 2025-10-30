@@ -15,7 +15,7 @@ setup_called = set()
 
 
 def apply_settings(extension, name):
-    if not hasattr(extension, 'params'):
+    if not hasattr(extension, "params"):
         return
 
     for param in extension.params:
@@ -33,14 +33,16 @@ def load_extensions():
         if name not in available_extensions:
             continue
 
-        if name != 'api':
+        if name != "api":
             logger.info(f'Loading the extension "{name}"')
 
         try:
             # Prefer user extension, fall back to system extension
-            user_script_path = Path(f'user_data/extensions/{name}/script.py')
+            user_script_path = Path(f"user_data/extensions/{name}/script.py")
             if user_script_path.exists():
-                extension = importlib.import_module(f"user_data.extensions.{name}.script")
+                extension = importlib.import_module(
+                    f"user_data.extensions.{name}.script"
+                )
             else:
                 extension = importlib.import_module(f"extensions.{name}.script")
 
@@ -53,8 +55,12 @@ def load_extensions():
             state[name] = [True, i, extension]  # Store extension object
 
         except ModuleNotFoundError:
-            extension_location = Path('user_data/extensions') / name if user_script_path.exists() else Path('extensions') / name
-            windows_path = str(extension_location).replace('/', '\\')
+            extension_location = (
+                Path("user_data/extensions") / name
+                if user_script_path.exists()
+                else Path("extensions") / name
+            )
+            windows_path = str(extension_location).replace("/", "\\")
             logger.error(
                 f"Could not import the requirements for '{name}'. Make sure to install the requirements for the extension.\n\n"
                 f"* To install requirements automatically, launch the update_wizard script for your OS and:\n\n"
@@ -91,7 +97,7 @@ def _apply_string_extensions(function_name, text, state, is_chat=False):
             count = 0
             has_chat = False
             for k in signature(func).parameters:
-                if k == 'is_chat':
+                if k == "is_chat":
                     has_chat = True
                 else:
                     count += 1
@@ -102,7 +108,7 @@ def _apply_string_extensions(function_name, text, state, is_chat=False):
                 args = [text]
 
             if has_chat:
-                kwargs = {'is_chat': is_chat}
+                kwargs = {"is_chat": is_chat}
             else:
                 kwargs = {}
 
@@ -114,8 +120,10 @@ def _apply_string_extensions(function_name, text, state, is_chat=False):
 # Extension functions that map string -> string
 def _apply_chat_input_extensions(text, visible_text, state):
     for extension, _ in iterator():
-        if hasattr(extension, 'chat_input_modifier'):
-            text, visible_text = extension.chat_input_modifier(text, visible_text, state)
+        if hasattr(extension, "chat_input_modifier"):
+            text, visible_text = extension.chat_input_modifier(
+                text, visible_text, state
+            )
 
     return text, visible_text
 
@@ -123,7 +131,7 @@ def _apply_chat_input_extensions(text, visible_text, state):
 # custom_generate_chat_prompt handling - currently only the first one will work
 def _apply_custom_generate_chat_prompt(text, state, **kwargs):
     for extension, _ in iterator():
-        if hasattr(extension, 'custom_generate_chat_prompt'):
+        if hasattr(extension, "custom_generate_chat_prompt"):
             return extension.custom_generate_chat_prompt(text, state, **kwargs)
 
     return None
@@ -151,7 +159,9 @@ def _apply_history_modifier_extensions(history):
 def _apply_tokenizer_extensions(function_name, state, prompt, input_ids, input_embeds):
     for extension, _ in iterator():
         if hasattr(extension, function_name):
-            prompt, input_ids, input_embeds = getattr(extension, function_name)(state, prompt, input_ids, input_embeds)
+            prompt, input_ids, input_embeds = getattr(extension, function_name)(
+                state, prompt, input_ids, input_embeds
+            )
 
     return prompt, input_ids, input_embeds
 
@@ -172,8 +182,8 @@ def _apply_logits_processor_extensions(function_name, processor_list, input_ids)
 # currently only the first one will work
 def _apply_custom_tokenized_length(prompt):
     for extension, _ in iterator():
-        if hasattr(extension, 'custom_tokenized_length'):
-            return getattr(extension, 'custom_tokenized_length')(prompt)
+        if hasattr(extension, "custom_tokenized_length"):
+            return getattr(extension, "custom_tokenized_length")(prompt)
 
     return None
 
@@ -181,26 +191,26 @@ def _apply_custom_tokenized_length(prompt):
 # Custom generate reply handling - currently only the first one will work
 def _apply_custom_generate_reply():
     for extension, _ in iterator():
-        if hasattr(extension, 'custom_generate_reply'):
-            return getattr(extension, 'custom_generate_reply')
+        if hasattr(extension, "custom_generate_reply"):
+            return getattr(extension, "custom_generate_reply")
 
     return None
 
 
 def _apply_custom_css():
-    all_css = ''
+    all_css = ""
     for extension, _ in iterator():
-        if hasattr(extension, 'custom_css'):
-            all_css += getattr(extension, 'custom_css')()
+        if hasattr(extension, "custom_css"):
+            all_css += getattr(extension, "custom_css")()
 
     return all_css
 
 
 def _apply_custom_js():
-    all_js = ''
+    all_js = ""
     for extension, _ in iterator():
-        if hasattr(extension, 'custom_js'):
-            all_js += getattr(extension, 'custom_js')()
+        if hasattr(extension, "custom_js"):
+            all_js += getattr(extension, "custom_js")()
 
     return all_js
 
@@ -208,7 +218,9 @@ def _apply_custom_js():
 def create_extensions_block():
     to_display = []
     for extension, name in iterator():
-        if hasattr(extension, "ui") and not (hasattr(extension, 'params') and extension.params.get('is_tab', False)):
+        if hasattr(extension, "ui") and not (
+            hasattr(extension, "params") and extension.params.get("is_tab", False)
+        ):
             to_display.append((extension, name))
 
     # Creating the extension ui elements
@@ -221,8 +233,10 @@ def create_extensions_block():
 
 def create_extensions_tabs():
     for extension, name in iterator():
-        if hasattr(extension, "ui") and (hasattr(extension, 'params') and extension.params.get('is_tab', False)):
-            display_name = getattr(extension, 'params', {}).get('display_name', name)
+        if hasattr(extension, "ui") and (
+            hasattr(extension, "params") and extension.params.get("is_tab", False)
+        ):
+            display_name = getattr(extension, "params", {}).get("display_name", name)
             with gr.Tab(display_name, elem_classes="extension-tab"):
                 extension.ui()
 
@@ -235,12 +249,14 @@ EXTENSION_MAP = {
     "history": _apply_history_modifier_extensions,
     "bot_prefix": partial(_apply_string_extensions, "bot_prefix_modifier"),
     "tokenizer": partial(_apply_tokenizer_extensions, "tokenizer_modifier"),
-    'logits_processor': partial(_apply_logits_processor_extensions, 'logits_processor_modifier'),
+    "logits_processor": partial(
+        _apply_logits_processor_extensions, "logits_processor_modifier"
+    ),
     "custom_generate_chat_prompt": _apply_custom_generate_chat_prompt,
     "custom_generate_reply": _apply_custom_generate_reply,
     "tokenized_length": _apply_custom_tokenized_length,
     "css": _apply_custom_css,
-    "js": _apply_custom_js
+    "js": _apply_custom_js,
 }
 
 

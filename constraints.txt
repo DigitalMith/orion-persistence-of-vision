@@ -1,0 +1,40 @@
+# =========================
+# Orion / TGWUI constraints
+# =========================
+
+# --- UI layer (Gradio 4) ---
+# Keep this pair exactly. We hot-patch gradio_client via sitecustomize.py for JSON-Schema booleans.
+gradio==4.37.2
+gradio_client==1.0.2
+jinja2==3.1.6
+markupsafe==2.1.5
+
+# --- FastAPI stack (Pydantic v2) ---
+fastapi==0.112.4
+starlette==0.38.6
+pydantic==2.11.0
+pydantic_core==2.33.0
+python-multipart==0.0.20
+httpx==0.28.1
+anyio==4.11.0
+uvicorn==0.30.6
+
+# --- HF / Transformers stack ---
+transformers==4.39.3
+tokenizers==0.15.2
+# Pre-1.0 hub keeps HfFolder and satisfies datasets/peft constraints
+huggingface_hub==0.25.2
+
+# --- llama.cpp (loader=llama) ---
+llama-cpp-python==0.2.90
+numpy==2.3.4
+typing-extensions==4.15.0
+diskcache==5.6.3
+
+# --- RAG / Chroma (used by Orion LTM) ---
+# Use the version we verified earlier with your pipeline.
+chromadb==0.4.15
+sentence-transformers==2.2.2
+# (Only include pypika/duckdb if you explicitly need newer Chroma features)
+# pypika==0.48.9
+# duckdb==0.10.2

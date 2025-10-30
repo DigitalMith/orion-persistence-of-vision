@@ -1,4 +1,4 @@
-'''
+"""
 This file has been 100% copied from this PR to the Transformers library:
 https://github.com/huggingface/transformers/pull/27557
 
@@ -6,7 +6,7 @@ Author: Saibo-creator
 Author GitHub: https://github.com/Saibo-creator
 
 All credits go to the author.
-'''
+"""
 
 import math
 
@@ -38,7 +38,9 @@ class GrammarConstrainedLogitsProcessor(LogitsProcessor):
         # resolve each stack to a tensor of True/False for each token
         # indicating acceptance
         # acceptance = self.grammar_acceptor.filter_vocab(self.stacks, device)
-        acceptance = self.grammar_constraint.batch_filter_vocab(self.batch_stacks, device)
+        acceptance = self.grammar_constraint.batch_filter_vocab(
+            self.batch_stacks, device
+        )
         # logger.debug(acceptance)
         # Logits to -inf where False
         logits[~acceptance] = -math.inf
@@ -53,13 +55,19 @@ class GrammarConstrainedLogitsProcessor(LogitsProcessor):
         """
         # we dynamically create stacks at the first call, so that we know the batch size and beam size
         if self.batch_stacks is None:
-            self.batch_stacks = [self.grammar_constraint.init_stacks() for _ in range(len(input_ids))]
+            self.batch_stacks = [
+                self.grammar_constraint.init_stacks() for _ in range(len(input_ids))
+            ]
 
         # if self.last_size is not set (which would be the case when processing the first token).
         # In this case, do nothing.
         if self.last_size is None:
             prefix_to_parse = [
-                single_input_ids[parse_start_index:] if parse_start_index is not None else []
+                (
+                    single_input_ids[parse_start_index:]
+                    if parse_start_index is not None
+                    else []
+                )
                 for single_input_ids in input_ids
             ]
             # self.grammar_acceptor.accept_token_ids(prefix_to_parse, self.stacks)
@@ -100,5 +108,7 @@ class GrammarConstrainedLogitsProcessor(LogitsProcessor):
         return scores
 
     @add_start_docstrings(LOGITS_PROCESSOR_INPUTS_DOCSTRING)
-    def __call__(self, input_ids: torch.LongTensor, scores: torch.FloatTensor) -> torch.FloatTensor:
+    def __call__(
+        self, input_ids: torch.LongTensor, scores: torch.FloatTensor
+    ) -> torch.FloatTensor:
         return self.process_logits(input_ids, scores)

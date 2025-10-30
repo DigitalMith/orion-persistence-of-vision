@@ -380,7 +380,7 @@ class FPSchedulerTrainer(transformers.Trainer):
             num_warmup_acc_min = min(num_warmup_acc, num_firstepoch_steps_acc)
 
             if num_warmup_acc>num_firstepoch_steps_acc:
-                print(f"\033[1;31;1mWARNING: The number of warmup steps is set too high! It will be clamped to 1 epoch, essentially going from warmup to annealing.\033[0;37;0m")
+                print("\033[1;31;1mWARNING: The number of warmup steps is set too high! It will be clamped to 1 epoch, essentially going from warmup to annealing.\033[0;37;0m")
                 print (f"FP Scheduler Warmup: 0-[{num_warmup_acc_min}], Hold [{num_warmup_acc_min}]-{num_firstepoch_steps_acc}, Annealing {num_firstepoch_steps_acc}-{num_training_steps_acc}")
             else:
                 print (f"FP Scheduler Warmup: 0-{num_warmup_acc_min}, Hold {num_warmup_acc_min}-{num_firstepoch_steps_acc}, Annealing {num_firstepoch_steps_acc}-{num_training_steps_acc}")
@@ -399,7 +399,7 @@ class FPSchedulerTrainer(transformers.Trainer):
             num_warmup_acc_min = min(num_warmup_acc, half_step_acc)
 
             if num_warmup_acc>half_step_acc:
-                print(f"\033[1;31;1mWARNING: The number of warmup steps is set too high! It will be clamped to half of all epochs, essentially going from warmup to annealing in the middle.\033[0;37;0m")
+                print("\033[1;31;1mWARNING: The number of warmup steps is set too high! It will be clamped to half of all epochs, essentially going from warmup to annealing in the middle.\033[0;37;0m")
                 print (f"FP Scheduler Warmup: 0-[{num_warmup_acc_min}], Hold [{num_warmup_acc_min}]-{half_step_acc}, Annealing {half_step_acc}-{num_training_steps_acc}")
             else:
                 print (f"FP Scheduler Warmup: 0-{num_warmup_acc_min}, Hold {num_warmup_acc_min}-{half_step_acc}, Annealing {half_step_acc}-{num_training_steps_acc}")
@@ -417,7 +417,7 @@ class FPSchedulerTrainer(transformers.Trainer):
             half_step_acc = num_training_steps_acc//2
             
             if num_warmup_steps>0:
-                print(f"Warmup doesn't apply to this scheduler [Raise-Fall]")
+                print("Warmup doesn't apply to this scheduler [Raise-Fall]")
 
             print (f"Scheduler Raise: 0-{half_step_acc}, Fall {half_step_acc}-{num_training_steps_acc}")
 

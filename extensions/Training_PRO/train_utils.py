@@ -2,7 +2,6 @@ import os
 from modules import shared, utils
 from pathlib import Path
 import requests
-import tqdm
 import json
 
 '''
@@ -353,7 +352,7 @@ def download_file_from_url(url, overwrite, output_dir_in, valid_extensions = {'.
                     print("File Downloaded")
                 else:
                     print("Downloaded file is zero")
-                    yield f"Failed. Downloaded file size is zero)."
+                    yield "Failed. Downloaded file size is zero)."
             else:
                 print(f"Error: {local_filename} failed to download.")
                 yield f"Error: {local_filename} failed to download"

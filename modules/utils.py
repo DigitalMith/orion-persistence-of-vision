@@ -16,40 +16,40 @@ def gradio(*keys):
 
 
 def save_file(fname, contents):
-    if fname == '':
-        logger.error('File name is empty!')
+    if fname == "":
+        logger.error("File name is empty!")
         return
 
     root_folder = Path(__file__).resolve().parent.parent
     abs_path_str = os.path.abspath(fname)
     rel_path_str = os.path.relpath(abs_path_str, root_folder)
     rel_path = Path(rel_path_str)
-    if rel_path.parts[0] == '..':
-        logger.error(f'Invalid file path: \"{fname}\"')
+    if rel_path.parts[0] == "..":
+        logger.error(f'Invalid file path: "{fname}"')
         return
 
-    with open(abs_path_str, 'w', encoding='utf-8') as f:
+    with open(abs_path_str, "w", encoding="utf-8") as f:
         f.write(contents)
 
-    logger.info(f'Saved \"{abs_path_str}\".')
+    logger.info(f'Saved "{abs_path_str}".')
 
 
 def delete_file(fname):
-    if fname == '':
-        logger.error('File name is empty!')
+    if fname == "":
+        logger.error("File name is empty!")
         return
 
     root_folder = Path(__file__).resolve().parent.parent
     abs_path_str = os.path.abspath(fname)
     rel_path_str = os.path.relpath(abs_path_str, root_folder)
     rel_path = Path(rel_path_str)
-    if rel_path.parts[0] == '..':
-        logger.error(f'Invalid file path: \"{fname}\"')
+    if rel_path.parts[0] == "..":
+        logger.error(f'Invalid file path: "{fname}"')
         return
 
     if rel_path.exists():
         rel_path.unlink()
-        logger.info(f'Deleted \"{fname}\".')
+        logger.info(f'Deleted "{fname}".')
 
 
 def current_time():
@@ -69,11 +69,11 @@ def replace_all(text, dic):
 
 
 def natural_keys(text):
-    return [atoi(c) for c in re.split(r'(\d+)', text)]
+    return [atoi(c) for c in re.split(r"(\d+)", text)]
 
 
 def check_model_loaded():
-    if shared.model_name == 'None' or shared.model is None:
+    if shared.model_name == "None" or shared.model is None:
         if len(get_available_models()) == 0:
             error_msg = "No model is loaded.\n\nTo get started:\n1) Place a GGUF file in your user_data/models folder\n2) Go to the Model tab and select it"
             logger.error(error_msg)
@@ -96,7 +96,7 @@ def resolve_model_path(model_name_or_path):
     if path_candidate.exists():
         return path_candidate
     else:
-        return Path(f'{shared.args.model_dir}/{model_name_or_path}')
+        return Path(f"{shared.args.model_dir}/{model_name_or_path}")
 
 
 def get_available_models():
@@ -108,7 +108,7 @@ def get_available_models():
     for gguf_path in gguf_files:
         filename = os.path.basename(gguf_path)
 
-        match = re.search(r'-(\d+)-of-\d+\.gguf$', filename)
+        match = re.search(r"-(\d+)-of-\d+\.gguf$", filename)
 
         if match:
             part_number = match.group(1)
@@ -133,7 +133,11 @@ def get_available_models():
     for item in os.listdir(model_dir):
         item_path = model_dir / item
         if item_path.is_dir():
-            if any(file.lower().endswith(('.safetensors', '.pt')) for file in os.listdir(item_path) if (item_path / file).is_file()):
+            if any(
+                file.lower().endswith((".safetensors", ".pt"))
+                for file in os.listdir(item_path)
+                if (item_path / file).is_file()
+            ):
                 dirs_with_safetensors.add(item)
 
     # Find valid model directories
@@ -168,34 +172,41 @@ def get_available_ggufs():
 
 
 def get_available_mmproj():
-    mmproj_dir = Path('user_data/mmproj')
+    mmproj_dir = Path("user_data/mmproj")
     if not mmproj_dir.exists():
-        return ['None']
+        return ["None"]
 
     mmproj_files = []
     for item in mmproj_dir.iterdir():
-        if item.is_file() and item.suffix.lower() in ('.gguf', '.bin'):
+        if item.is_file() and item.suffix.lower() in (".gguf", ".bin"):
             mmproj_files.append(item.name)
 
-    return ['None'] + sorted(mmproj_files, key=natural_keys)
+    return ["None"] + sorted(mmproj_files, key=natural_keys)
 
 
 def get_available_presets():
-    return sorted(set((k.stem for k in Path('user_data/presets').glob('*.yaml'))), key=natural_keys)
+    return sorted(
+        set((k.stem for k in Path("user_data/presets").glob("*.yaml"))),
+        key=natural_keys,
+    )
 
 
 def get_available_prompts():
-    notebook_dir = Path('user_data/logs/notebook')
+    notebook_dir = Path("user_data/logs/notebook")
     notebook_dir.mkdir(parents=True, exist_ok=True)
 
-    prompt_files = list(notebook_dir.glob('*.txt'))
+    prompt_files = list(notebook_dir.glob("*.txt"))
     sorted_files = sorted(prompt_files, key=lambda x: x.stat().st_mtime, reverse=True)
     prompts = [file.stem for file in sorted_files]
     return prompts
 
 
 def get_available_characters():
-    paths = (x for x in Path('user_data/characters').iterdir() if x.suffix in ('.json', '.yaml', '.yml'))
+    paths = (
+        x
+        for x in Path("user_data/characters").iterdir()
+        if x.suffix in (".json", ".yaml", ".yml")
+    )
     return sorted(set((k.stem for k in paths)), key=natural_keys)
 
 
@@ -203,41 +214,82 @@ def get_available_instruction_templates():
     path = "user_data/instruction-templates"
     paths = []
     if os.path.exists(path):
-        paths = (x for x in Path(path).iterdir() if x.suffix in ('.json', '.yaml', '.yml'))
+        paths = (
+            x for x in Path(path).iterdir() if x.suffix in (".json", ".yaml", ".yml")
+        )
 
-    return ['None'] + sorted(set((k.stem for k in paths)), key=natural_keys)
+    return ["None"] + sorted(set((k.stem for k in paths)), key=natural_keys)
 
 
 def get_available_extensions():
     # User extensions (higher priority)
     user_extensions = []
-    user_ext_path = Path('user_data/extensions')
+    user_ext_path = Path("user_data/extensions")
     if user_ext_path.exists():
-        user_exts = map(lambda x: x.parts[2], user_ext_path.glob('*/script.py'))
+        user_exts = map(lambda x: x.parts[2], user_ext_path.glob("*/script.py"))
         user_extensions = sorted(set(user_exts), key=natural_keys)
 
     # System extensions (excluding those overridden by user extensions)
-    system_exts = map(lambda x: x.parts[1], Path('extensions').glob('*/script.py'))
-    system_extensions = sorted(set(system_exts) - set(user_extensions), key=natural_keys)
+    system_exts = map(lambda x: x.parts[1], Path("extensions").glob("*/script.py"))
+    system_extensions = sorted(
+        set(system_exts) - set(user_extensions), key=natural_keys
+    )
 
     return user_extensions + system_extensions
 
 
 def get_available_loras():
-    return ['None'] + sorted([item.name for item in list(Path(shared.args.lora_dir).glob('*')) if not item.name.endswith(('.txt', '-np', '.pt', '.json'))], key=natural_keys)
+    return ["None"] + sorted(
+        [
+            item.name
+            for item in list(Path(shared.args.lora_dir).glob("*"))
+            if not item.name.endswith((".txt", "-np", ".pt", ".json"))
+        ],
+        key=natural_keys,
+    )
 
 
 def get_datasets(path: str, ext: str):
     # include subdirectories for raw txt files to allow training from a subdirectory of txt files
     if ext == "txt":
-        return ['None'] + sorted(set([k.stem for k in list(Path(path).glob('*.txt')) + list(Path(path).glob('*/')) if k.stem != 'put-trainer-datasets-here']), key=natural_keys)
+        return ["None"] + sorted(
+            set(
+                [
+                    k.stem
+                    for k in list(Path(path).glob("*.txt"))
+                    + list(Path(path).glob("*/"))
+                    if k.stem != "put-trainer-datasets-here"
+                ]
+            ),
+            key=natural_keys,
+        )
 
-    return ['None'] + sorted(set([k.stem for k in Path(path).glob(f'*.{ext}') if k.stem != 'put-trainer-datasets-here']), key=natural_keys)
+    return ["None"] + sorted(
+        set(
+            [
+                k.stem
+                for k in Path(path).glob(f"*.{ext}")
+                if k.stem != "put-trainer-datasets-here"
+            ]
+        ),
+        key=natural_keys,
+    )
 
 
 def get_available_chat_styles():
-    return sorted(set(('-'.join(k.stem.split('-')[1:]) for k in Path('css').glob('chat_style*.css'))), key=natural_keys)
+    return sorted(
+        set(
+            (
+                "-".join(k.stem.split("-")[1:])
+                for k in Path("css").glob("chat_style*.css")
+            )
+        ),
+        key=natural_keys,
+    )
 
 
 def get_available_grammars():
-    return ['None'] + sorted([item.name for item in list(Path('user_data/grammars').glob('*.gbnf'))], key=natural_keys)
+    return ["None"] + sorted(
+        [item.name for item in list(Path("user_data/grammars").glob("*.gbnf"))],
+        key=natural_keys,
+    )

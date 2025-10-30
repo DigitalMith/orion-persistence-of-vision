@@ -419,7 +419,7 @@ def ui():
             result += f"\n[Batch Size: {micro_batch_size}, Epochs: {epochs}, Gradient Accumulation: {grad_accumulation}]\n"
             result += f"Total number of steps: {number_ofSteps}\n"
             result += f"Steps per each Epoch: {num_stepsPer_epoch}\n"
-            result += f"Suggestions:\n"
+            result += "Suggestions:\n"
             result += f"Checkpoints: Save every {save_each_n_min} - {save_each_n_max} steps (Current: {int(save_steps)})\n"
             result += f"Warmup steps: {warmup_steps_suggest} (Current: {int(warmup_steps)})"
             if gradient_accumulation_max < grad_accumulation: 
@@ -848,7 +848,7 @@ def do_train(lora_name: str, always_override: bool, save_steps: int, micro_batch
                         train_log_graph = json.load(json_file)
                         print(" + Training Graph loaded")   
                 except:
-                    print(f"Can't read training_graph")
+                    print("Can't read training_graph")
 
 
     except:
@@ -887,7 +887,7 @@ def do_train(lora_name: str, always_override: bool, save_steps: int, micro_batch
                 if non_serialized_params['save_checkpoint_now']:
                     force_save = True
                     non_serialized_params.update({"save_checkpoint_now": False})
-                    print(f"\033[1;31;1mSave Checkpoint manually trigerred.\033[0;37;0m")
+                    print("\033[1;31;1mSave Checkpoint manually trigerred.\033[0;37;0m")
                     folder_save = f"checkpoint-{current_steps_offset}-user"  
 
                 patience = 3     # Set the number of consecutive steps for tracking stability

@@ -15,7 +15,7 @@ from modules.logging_colors import logger
 
 def get_current_timestamp():
     """Returns the current time in 24-hour format"""
-    return datetime.now().strftime('%b %d, %Y %H:%M')
+    return datetime.now().strftime("%b %d, %Y %H:%M")
 
 
 def download_web_page(url, timeout=10):
@@ -26,7 +26,7 @@ def download_web_page(url, timeout=10):
 
     try:
         headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
         }
         response = requests.get(url, headers=headers, timeout=timeout)
         response.raise_for_status()  # Raise an exception for bad status codes
@@ -56,23 +56,33 @@ def perform_web_search(query, num_pages=3, max_workers=5, timeout=10):
 
         agents = [
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
         ]
 
         response_text = ""
-        req = urllib.request.Request(search_url, headers={'User-Agent': random.choice(agents)})
+        req = urllib.request.Request(
+            search_url, headers={"User-Agent": random.choice(agents)}
+        )
         with urllib.request.urlopen(req, timeout=timeout) as response:
-            response_text = response.read().decode('utf-8')
+            response_text = response.read().decode("utf-8")
 
         # Extract results with regex
-        titles = re.findall(r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*>(.*?)</a>', response_text, re.DOTALL)
-        urls = re.findall(r'<a[^>]*class="[^"]*result__url[^"]*"[^>]*>(.*?)</a>', response_text, re.DOTALL)
+        titles = re.findall(
+            r'<a[^>]*class="[^"]*result__a[^"]*"[^>]*>(.*?)</a>',
+            response_text,
+            re.DOTALL,
+        )
+        urls = re.findall(
+            r'<a[^>]*class="[^"]*result__url[^"]*"[^>]*>(.*?)</a>',
+            response_text,
+            re.DOTALL,
+        )
 
         # Prepare download tasks
         download_tasks = []
         for i in range(min(len(titles), len(urls), num_pages)):
             url = f"https://{urls[i].strip()}"
-            title = re.sub(r'<[^>]+>', '', titles[i]).strip()
+            title = re.sub(r"<[^>]+>", "", titles[i]).strip()
             title = html.unescape(title)
             download_tasks.append((url, title, i))
 
@@ -92,16 +102,12 @@ def perform_web_search(query, num_pages=3, max_workers=5, timeout=10):
                 try:
                     content = future.result()
                     search_results[index] = {
-                        'title': title,
-                        'url': url,
-                        'content': content
+                        "title": title,
+                        "url": url,
+                        "content": content,
                     }
                 except Exception:
-                    search_results[index] = {
-                        'title': title,
-                        'url': url,
-                        'content': ''
-                    }
+                    search_results[index] = {"title": title, "url": url, "content": ""}
 
         return search_results
 
@@ -136,7 +142,7 @@ def add_web_search_attachments(history, row_idx, user_message, search_query, sta
         logger.info(f"Using search query: {search_query}")
 
         # Perform web search
-        num_pages = int(state.get('web_search_pages', 3))
+        num_pages = int(state.get("web_search_pages", 3))
         search_results = perform_web_search(search_query, num_pages)
 
         if not search_results:
@@ -144,7 +150,9 @@ def add_web_search_attachments(history, row_idx, user_message, search_query, sta
             return
 
         # Filter out failed downloads before adding attachments
-        successful_results = [result for result in search_results if result['content'].strip()]
+        successful_results = [
+            result for result in search_results if result["content"].strip()
+        ]
 
         if not successful_results:
             logger.warning("No successful downloads to add as attachments")
@@ -152,21 +160,23 @@ def add_web_search_attachments(history, row_idx, user_message, search_query, sta
 
         # Add search results as attachments
         key = f"user_{row_idx}"
-        if key not in history['metadata']:
-            history['metadata'][key] = {"timestamp": get_current_timestamp()}
-        if "attachments" not in history['metadata'][key]:
-            history['metadata'][key]["attachments"] = []
+        if key not in history["metadata"]:
+            history["metadata"][key] = {"timestamp": get_current_timestamp()}
+        if "attachments" not in history["metadata"][key]:
+            history["metadata"][key]["attachments"] = []
 
         for result in successful_results:
             attachment = {
-                "name": result['title'],
+                "name": result["title"],
                 "type": "text/html",
-                "url": result['url'],
-                "content": truncate_content_by_tokens(result['content'])
+                "url": result["url"],
+                "content": truncate_content_by_tokens(result["content"]),
             }
-            history['metadata'][key]["attachments"].append(attachment)
+            history["metadata"][key]["attachments"].append(attachment)
 
-        logger.info(f"Added {len(successful_results)} successful web search results as attachments.")
+        logger.info(
+            f"Added {len(successful_results)} successful web search results as attachments."
+        )
 
     except Exception as e:
         logger.error(f"Error in web search: {e}")
