@@ -1,8 +1,21 @@
 /css
-/extensions
 /installer_files
 /repositories
-/user_data
+
+# Ignore all extensions by default
+/extensions/**
+!extensions/orion_ltm/
+!extensions/orion_ltm/**
+
+# Ignore all user_data, but allow select files
+/user_data/**
+!user_data/characters/
+!user_data/characters/Orion.png
+!user_data/characters/Orion.yaml
+!user_data/logs/
+!user_data/logs/chat/orion/
+!user_data/logs/chat/orion/*.json
+!user_data/setting.yaml
 
 .chroma
 .DS_Store
