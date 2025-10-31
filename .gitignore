@@ -31,3 +31,75 @@ wandb
 /docker-compose.yml
 /Dockerfile
 .env
+# === PYTHON ===
+__pycache__/
+*.py[cod]
+*.pyo
+*.so
+*.egg-info/
+dist/
+build/
+*.sqlite3
+
+# === VENV ===
+.venv/
+venv/
+env/
+ENV/
+venv-orion/
+
+# === LOGS & TEMP ===
+*.log
+*.bak
+*.tmp
+*.swp
+*.lock
+nohup.out
+
+# === SECRETS ===
+.env
+.envrc
+.direnv
+*.pem
+*.key
+*.secret
+
+# === OS JUNK ===
+.DS_Store
+Thumbs.db
+
+# === IDEs & EDITORS ===
+.vscode/
+.idea/
+*.sublime*
+
+# === TGWUI / ORION-SPECIFIC ===
+user_data/
+wandb/
+models/
+loras/
+training_output/
+css/
+repositories/
+extensions/experimental/
+*.safetensors
+*.pt
+*.ckpt
+*.onnx
+*.whl
+start_orion.*
+constraints.*.txt
+temp_requirements.txt
+installer_files/
+*.tar.gz
+*.zip
+*.7z
+
+# === JUPYTER ===
+*.ipynb
+.ipynb_checkpoints/
+
+# === GIT CONTROL ===
+.gitattributes
+.githooks/
+.gitmodules
