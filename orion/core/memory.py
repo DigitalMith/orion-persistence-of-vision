@@ -43,7 +43,7 @@ class MemoryManager:
         try:
             collection = self.client.get_collection(name=self.collection_name)
             print(f"Loaded existing collection: {self.collection_name}")
-        except:
+        except Exception:
             collection = self.client.create_collection(
                 name=self.collection_name,
                 metadata={"hnsw:space": "cosine"}
@@ -235,7 +235,7 @@ class MemoryManager:
         """
         results = self.collection.get(ids=[memory_id])
         
-        if results['ids']:
+        if results['ids'] and len(results['ids']) > 0:
             return {
                 'id': results['ids'][0],
                 'document': results['documents'][0],
