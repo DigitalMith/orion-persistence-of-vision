@@ -1,0 +1,25 @@
+# Orion Configuration File
+
+# Embedding model configuration
+embedding:
+  model: intfloat/e5-large-v2  # E5 large model for high-quality embeddings
+
+# Memory management configuration
+memory:
+  database: ./chroma_data  # Path to ChromaDB storage
+  collection: orion_memory  # Collection name for memories
+
+# Retrieval configuration
+retrieval:
+  n_results: 5  # Number of memories to retrieve for context
+  emotion_boost: true  # Enable emotion-weighted ranking
+  context_template: |
+    Relevant memories from your past interactions:
+    {memories}
+    
+    Based on these memories, please respond to:
+
+# LLM API configuration (text-generation-webui)
+llm:
+  url: http://localhost:5000  # Base URL of text-generation-webui API
+  api_key: null  # Optional API key for authentication
