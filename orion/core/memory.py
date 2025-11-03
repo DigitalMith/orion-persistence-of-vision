@@ -44,6 +44,8 @@ class MemoryManager:
             collection = self.client.get_collection(name=self.collection_name)
             print(f"Loaded existing collection: {self.collection_name}")
         except Exception:
+            # Catch any exception (collection not found, connection issues, etc.)
+            # and create a new collection
             collection = self.client.create_collection(
                 name=self.collection_name,
                 metadata={"hnsw:space": "cosine"}
