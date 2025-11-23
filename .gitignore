@@ -46,3 +46,4 @@ orion_cli/models/embeddings/*
 
 
 installer_files/env/
+orion_cli/.env
