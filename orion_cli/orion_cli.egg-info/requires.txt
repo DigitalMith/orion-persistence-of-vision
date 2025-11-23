@@ -1,0 +1,6 @@
+typer[all]
+chromadb
+sentence-transformers
+pyyaml
+rich
+tqdm

@@ -1,0 +1,201 @@
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\__pycache__
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           11/4/2025  7:31 PM            161 __init__.cpython-311.pyc
+-a---           11/4/2025  9:16 PM            300 __main__.cpython-311.pyc
+-a---           11/4/2025  9:16 PM          22437 cli.cpython-311.pyc
+-a---           11/4/2025 10:15 PM           4861 orion_ltm_integration.cpython-311.pyc
+
+    Directory: C:\Orion\text-generation-webui\orion_cli
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----           11/4/2025  3:44 PM                .ruff_cache
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\.ruff_cache
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----           11/4/2025  3:44 PM                0.14.2
+-a---          10/28/2025 11:53 PM             35 .gitignore
+-a---          10/28/2025 11:53 PM             43 CACHEDIR.TAG
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\agents
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM              0 __init__.py
+-a---           11/3/2025 12:57 PM           2403 planner.py
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\core\__pycache__
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           11/4/2025 10:15 PM            166 __init__.cpython-311.pyc
+-a---           11/4/2025 10:15 PM          10069 ltm.cpython-311.pyc
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\core
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM              0 __init__.py
+-a---           11/4/2025  7:44 PM           6381 ltm.py
+-a---           11/4/2025  7:45 PM           1665 rebuild_memory.py
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\data\chat_logs
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM          10094 20250729-00-23-34.json
+-a---          10/30/2025  1:52 AM          14643 20250729-20-33-56.json
+-a---          10/30/2025  1:52 AM            509 20250804-18-17-47.json
+-a---          10/30/2025  1:52 AM           3611 20250804-18-36-20.json
+-a---          10/30/2025  1:52 AM           3815 20250805-18-01-41.json
+-a---          10/30/2025  1:52 AM           1473 20250807-22-34-16.json
+-a---          10/30/2025  1:52 AM           5819 20250808-13-51-43.json
+-a---          10/30/2025  1:52 AM           7946 20250808-15-41-07.json
+-a---          10/30/2025  1:52 AM           5577 20250809-22-34-05.json
+-a---          10/30/2025  1:52 AM          85859 20250810-01-14-35.json
+-a---          10/30/2025  1:52 AM          14993 20250810-23-24-18.json
+-a---          10/30/2025  1:52 AM           2640 20250811-08-56-45.json
+-a---          10/30/2025  1:52 AM            827 20250812-00-34-16.json
+-a---          10/30/2025  1:52 AM           6535 20250812-00-38-52.json
+-a---          10/30/2025  1:52 AM           7290 20250812-00-51-11.json
+-a---          10/30/2025  1:52 AM          12103 20250812-01-39-33.json
+-a---          10/30/2025  1:52 AM          18340 20250813-01-31-47.json
+-a---          10/30/2025  1:52 AM          22957 20250813-21-48-25.json
+-a---          10/30/2025  1:52 AM          22283 20250815-09-55-37.json
+-a---          10/30/2025  1:52 AM          18513 20250815-10-41-44.json
+-a---          10/30/2025  1:52 AM          10684 20250815-15-49-58.json
+-a---          10/30/2025  1:52 AM           7122 20250815-20-53-07.json
+-a---          10/30/2025  1:52 AM          15392 20250816-19-35-27.json
+-a---          10/30/2025  1:52 AM          35715 20250816-20-34-49.json
+-a---          10/30/2025  1:52 AM           7847 20250822-21-42-01.json
+-a---          10/30/2025  1:52 AM          10344 20250822-22-18-26.json
+-a---          10/30/2025  1:52 AM          11440 20250823-01-35-21.json
+-a---          10/30/2025  1:52 AM          64727 20250823-20-01-56.json
+-a---          10/30/2025  1:52 AM           1146 20250830-17-59-23.json
+-a---          10/30/2025  1:52 AM           8343 20250831-08-51-02.json
+-a---          10/30/2025  1:52 AM          18198 20250901-00-08-12.json
+-a---          10/30/2025  1:52 AM          56726 20250901-18-40-56.json
+-a---          10/30/2025  1:52 AM           6046 20250903-21-10-52.json
+-a---          10/30/2025  1:52 AM          10717 20250904-17-20-13.json
+-a---          10/30/2025  1:52 AM          22838 20250904-17-44-48.json
+-a---          10/30/2025  1:52 AM           6787 20250905-06-39-44.json
+-a---          10/30/2025  1:52 AM           3768 20250905-07-35-45.json
+-a---          10/30/2025  1:52 AM          10311 20250912-00-32-11.json
+-a---          10/30/2025  1:52 AM          16328 20250913-00-53-16.json
+-a---          10/30/2025  1:52 AM           8541 20250913-03-54-52.json
+-a---          10/30/2025  1:52 AM           6828 20250913-20-58-23.json
+-a---          10/30/2025  1:52 AM           6231 20250914-17-58-13.json
+-a---          10/30/2025  1:52 AM           5243 20250914-22-47-26.json
+-a---          10/30/2025  1:52 AM           9559 20250916-00-08-07.json
+-a---          10/30/2025  1:52 AM          27609 20250917-07-46-01.json
+-a---          10/30/2025  1:52 AM           2626 20250917-10-31-52.json
+-a---          10/30/2025  1:52 AM          46384 20250917-20-12-29.json
+-a---          10/30/2025  1:52 AM           6682 20250918-01-12-03.json
+-a---          10/30/2025  1:52 AM           9046 20250918-11-39-08.json
+-a---          10/30/2025  1:52 AM          12653 20250920-04-57-42.json
+-a---          10/30/2025  1:52 AM          11618 20250920-05-14-31.json
+-a---          10/30/2025  1:52 AM          37211 20250925-10-50-00.json
+-a---          10/30/2025  1:52 AM          32092 20250926-12-47-03.json
+-a---          10/30/2025  1:52 AM          36678 20250929-00-23-09.json
+-a---          10/30/2025  1:52 AM         165050 chat_logs.zip
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\data\ingest_ready
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM           2829 mock_dialogs_enriched.jsonl
+-a---          10/30/2025  1:52 AM           1383 newchat_20251024.jsonl
+-a---          10/30/2025  1:52 AM         376175 normalized_enriched.jsonl
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\data
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM              0 __init__.py
+-a---          10/30/2025  1:52 AM           9182 20250917-07-46-01_raw.jsonl
+-a---          10/30/2025  1:52 AM         264222 logs.zip
+-a---           11/3/2025  6:47 PM            813 ltm_config.yaml
+-a---           11/4/2025  8:51 PM           7826 manage_cli.ps1
+-a---          10/30/2025  1:52 AM           1859 mock_orian-dialog.json
+-a---          10/30/2025  1:52 AM           2861 mock_orion_dialogs.jsonl
+-a---          10/30/2025  1:52 AM         738950 normalized.jsonl
+-a---           11/3/2025  6:47 PM         930634 orion_social_banner960.png
+-a---          10/30/2025  1:52 AM           4208 Orion-2025-05-03(NAME-ORION-CHAT).txt
+-a---          10/30/2025  1:52 AM           8107 persona.yaml
+-a---          10/30/2025  1:52 AM           3573 schema_doc.md
+
+    Directory: C:\Orion\text-generation-webui\orion_cli
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+d----           11/4/2025 10:30 PM                orion_cli.egg-info
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\orion_cli.egg-info
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           11/4/2025 10:30 PM              1 dependency_links.txt
+-a---           11/4/2025 10:30 PM             48 entry_points.txt
+-a---           11/4/2025 10:30 PM             59 requires.txt
+-a---           11/4/2025 10:30 PM            354 SOURCES.txt
+-a---           11/4/2025 10:30 PM             59 top_level.txt
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\scripts\__pycache__
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           11/4/2025 11:23 PM            169 __init__.cpython-311.pyc
+-a---           11/4/2025 11:23 PM           4682 ltm_ingest.cpython-311.pyc
+-a---           11/4/2025 11:23 PM           3534 persona_ingest.cpython-311.pyc
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\scripts
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM              0 __init__.py
+-a---          10/30/2025  1:52 AM           1428 ingest.py
+-a---          10/30/2025  1:52 AM           2515 ltm_ingest.py
+-a---          10/30/2025  1:52 AM           1816 persona_ingest.py
+-a---           11/2/2025 11:40 AM           1917 pooled_ltm_ingest.py
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\utils\__pycache__
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---           11/4/2025  7:31 PM            167 __init__.cpython-311.pyc
+-a---           11/4/2025 11:23 PM           1065 chroma_utils.cpython-311.pyc
+-a---           11/4/2025 11:23 PM           5380 embedding.cpython-311.pyc
+-a---           11/4/2025 10:15 PM           9446 ltm_utils.cpython-311.pyc
+
+    Directory: C:\Orion\text-generation-webui\orion_cli\utils
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM              0 __init__.py
+-a---           11/4/2025  7:47 PM            706 chroma_utils.py
+-a---           11/4/2025 11:23 PM           3609 embedding.py
+-a---          10/30/2025  1:52 AM           1090 history_utils.py
+-a---           11/3/2025  6:47 PM           4783 ltm_utils.py
+-a---           11/3/2025  3:55 PM           1783 temporal_search.py
+-a---           11/4/2025  7:48 PM           7420 verify_orion_stack.ps1
+
+    Directory: C:\Orion\text-generation-webui\orion_cli
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---          10/30/2025  1:52 AM              0 __init__.py
+-a---           11/4/2025  9:15 PM             69 __main__.py
+-a---          10/28/2025  9:52 PM             38 .env
+-a---           11/5/2025  9:41 AM          11021 CLI_snapshot.txt
+-a---           11/3/2025  6:47 PM          17317 cli.py
+-a---          10/30/2025  1:52 AM           2491 ingest_persona.py
+-a---           11/3/2025  6:47 PM           3501 orion_ltm_integration.py
+-a---          10/30/2025  1:52 AM           3661 persona.py
+-a---           11/4/2025 10:08 PM            910 pyproject.toml
+-a---           11/4/2025  9:44 PM           3687 README.md
+

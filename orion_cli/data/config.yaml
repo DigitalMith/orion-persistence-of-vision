@@ -1,0 +1,46 @@
+# === Global CLI Configuration ===
+
+# HuggingFace embedding model used for semantic memory & search
+embed_dim: 768
+embed_model_path: "orion_cli/models/embeddings/jinaai-jina-v2-base-en"
+
+# Path to ChromaDB directory (where long-term memory is stored)
+chroma_path: C:/Orion/text-generation-webui/user_data/Chroma-DB
+
+
+# === Long-Term Memory (LTM) Settings ===
+ltm:
+  # Number of persona memory entries to return per query
+  topk_persona: 5
+
+  # Number of episodic memory entries to return per query
+  topk_episodic: 10
+
+  # Minimum importance score required for memory to be considered relevant (0–1)
+  importance_threshold: 0.6
+
+  # Minimum semantic similarity score to accept a memory match (0–1)
+  min_score: 0.7
+
+  # Number of turns to pool together during block-style memory ingest
+  pooling_turns: 3
+
+  # Enable automatic memory ingestion during conversation
+  live_pooled_ingest: true
+
+  # Boost weights for specific tones or tags in search ranking
+  boosts:
+    tone:
+      poetic: 0.05      # Slightly favor poetic memories
+      defiant: 0.05     # Slightly favor rebellious tone
+      somber: 0.05      # Slightly favor emotionally heavy tone
+
+    tags:
+      memory: 0.05      # Slightly favor items tagged as 'memory'
+      pooled: 0.05      # Slightly favor pooled (multi-turn) memories
+
+# === Debug ===
+debug:
+    enabled: true
+    show_recall: true               # Shows what persona + episodic shards are recalled
+    short_descriptions: true        # Merge existing load prints

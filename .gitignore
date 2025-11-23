@@ -1,33 +1,48 @@
-/css
-/extensions
-/installer_files
-/repositories
-/user_data
+# ======================
+# Orion/TGWUI Safe Gitignore
+# ======================
 
-.chroma
-.DS_Store
-.eslintrc.js
-.idea
-.installer_state.json
-.venv
-venv
-.envrc
-.direnv
-.vs
-.vscode
-*.bak
-*.ipynb
+# Virtual environments (never commit)
+venv*/
+.venv*/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# === LARGE MODEL FILES (NEVER COMMIT) ===
+models/
+loras/
+training_output/
+*.gguf
+*.safetensors
+*.pt
+*.ckpt
+*.onnx
+
+# Node modules (massive, auto-generated)
+extensions/*/node_modules/
+
+# Ignore temporary or debug files
 *.log
-*pycache*
-cert.pem
-key.pem
-package.json
-package-lock.json
-Thumbs.db
-wandb
+temp_*.py
+*.tmp
+*.bak
 
-# ignore user docker config and top level links to docker files
-/docker-compose.yaml
-/docker-compose.yml
-/Dockerfile
-.env
+# === TGWUI Embedded Installer (HUGE; never commit) ===
+installer_files/
+
+# HuggingFace caches (not needed but safe)
+hf_cache/
+huggingface_cache/
+transformers_cache/
+
+# TGWUI models folder — do NOT commit multi-GB models
+models/*
+
+# === Embedding models (all excluded; downloaded separately) ===
+orion_cli/models/embeddings/*
+!orion_cli/models/embeddings/.gitkeep
+
+
+installer_files/env/

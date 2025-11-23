@@ -1,0 +1,7 @@
+typer[all]
+chromadb
+sentence-transformers
+pyyaml
+rich
+tqdm
+numpy>=2.1.0
