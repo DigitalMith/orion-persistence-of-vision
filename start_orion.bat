@@ -23,6 +23,7 @@ python server.py ^
     --api ^
     --api-port 5001 ^
     --model "openhermes-2.5-mistral-7b.Q5_K_M.gguf" ^
-    --loader llama.cpp
+    --loader llama.cpp ^
+    --extensions orion_ltm
 
 pause

@@ -46,14 +46,18 @@ SLEEP_BETWEEN = 1.0  # seconds
 # ------------------------------
 def load_persona_text() -> str:
     if not PERSONA_FILE.exists():
-        print(f"[annotate] ⚠ persona.yaml not found at {PERSONA_FILE}, using empty persona.")
+        print(
+            f"[annotate] ⚠ persona.yaml not found at {PERSONA_FILE}, using empty persona."
+        )
         return ""
     return PERSONA_FILE.read_text(encoding="utf-8")
 
 
 def load_mock_text() -> str:
     if not MOCK_FILE.exists():
-        print(f"[annotate] ⚠ mock_compatible.json not found at {MOCK_FILE}, using empty mock examples.")
+        print(
+            f"[annotate] ⚠ mock_compatible.json not found at {MOCK_FILE}, using empty mock examples."
+        )
         return ""
     return MOCK_FILE.read_text(encoding="utf-8")
 
@@ -213,14 +217,18 @@ def annotate_batch(
             return result
 
         except Exception as e:
-            print(f"[annotate] ⚠ Batch annotation failed (attempt {attempt}/{MAX_RETRIES}): {e}")
+            print(
+                f"[annotate] ⚠ Batch annotation failed (attempt {attempt}/{MAX_RETRIES}): {e}"
+            )
             time.sleep(SLEEP_BETWEEN)
 
     # If all attempts failed, signal failure with Nones
     return [None] * len(pairs)
 
 
-def annotate_single(pair: Dict[str, Any], system_prompt: str) -> Optional[Dict[str, Any]]:
+def annotate_single(
+    pair: Dict[str, Any], system_prompt: str
+) -> Optional[Dict[str, Any]]:
     """
     Per-pair fallback annotation with its own small retry loop.
     """
@@ -250,7 +258,9 @@ def annotate_single(pair: Dict[str, Any], system_prompt: str) -> Optional[Dict[s
             else:
                 raise ValueError("Expected a single JSON object")
         except Exception as e:
-            print(f"[annotate] ⚠ Single annotation failed (attempt {attempt}/{SINGLE_RETRIES}): {e}")
+            print(
+                f"[annotate] ⚠ Single annotation failed (attempt {attempt}/{SINGLE_RETRIES}): {e}"
+            )
             time.sleep(SLEEP_BETWEEN)
 
     return None
@@ -266,7 +276,7 @@ def main():
         print(f"[annotate] ❌ Normalized file not found: {NORMALIZED_FILE}")
         return
 
-    print(f"[annotate] Loading persona and mock calibration data…")
+    print("[annotate] Loading persona and mock calibration data…")
     persona_text = load_persona_text()
     mock_text = load_mock_text()
     system_prompt = build_system_prompt(persona_text, mock_text)
@@ -290,9 +300,10 @@ def main():
     annotated_count = 0
     skipped_count = 0
 
-    with ANNOTATED_FILE.open("w", encoding="utf-8") as out_f, SKIPPED_FILE.open(
-        "a", encoding="utf-8"
-    ) as skipped_f:
+    with (
+        ANNOTATED_FILE.open("w", encoding="utf-8") as out_f,
+        SKIPPED_FILE.open("a", encoding="utf-8") as skipped_f,
+    ):
         i = 0
         while i < total:
             batch = pairs[i : i + BATCH_SIZE]
@@ -304,7 +315,9 @@ def main():
                 global_idx = i + idx_in_batch
                 if meta is None:
                     # Fallback to single annotation
-                    print(f"[annotate] ↪ Falling back to single annotation for index {global_idx}")
+                    print(
+                        f"[annotate] ↪ Falling back to single annotation for index {global_idx}"
+                    )
                     meta = annotate_single(pair, system_prompt)
 
                 if meta is None:

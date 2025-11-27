@@ -4,10 +4,8 @@ from pathlib import Path
 import logging
 import warnings
 import contextlib
-import os
 import io
-import sys
-import warnings
+
 warnings.filterwarnings("ignore", category=FutureWarning)
 
 cfg = get_config()
@@ -36,11 +34,11 @@ logging.getLogger("torch").setLevel(logging.ERROR)
 warnings.filterwarnings("ignore")
 
 # Redirect stdout + stderr during model load
-with contextlib.redirect_stdout(io.StringIO()), contextlib.redirect_stderr(io.StringIO()):
-    embedding_model = SentenceTransformer(
-        model_name,
-        trust_remote_code=True
-    )
+with (
+    contextlib.redirect_stdout(io.StringIO()),
+    contextlib.redirect_stderr(io.StringIO()),
+):
+    embedding_model = SentenceTransformer(model_name, trust_remote_code=True)
 
 print("[orion_cli] 🧠 Embedding model loaded.")
 
@@ -75,33 +73,25 @@ class OrionEmbeddingFunction:
 
     def embed_documents(self, texts):
         return self.model.encode(
-            texts,
-            convert_to_numpy=True,
-            normalize_embeddings=True
+            texts, convert_to_numpy=True, normalize_embeddings=True
         ).tolist()
 
     def embed_query(self, text):
         return self.model.encode(
-            [text],
-            convert_to_numpy=True,
-            normalize_embeddings=True
+            [text], convert_to_numpy=True, normalize_embeddings=True
         ).tolist()[0]
 
     # NEW: updated to ChromaDB's required signature
     def __call__(self, input):
         # ChromaDB passes a LIST of strings as "input"
         return self.model.encode(
-            input,
-            convert_to_numpy=True,
-            normalize_embeddings=True
+            input, convert_to_numpy=True, normalize_embeddings=True
         ).tolist()
 
     # Optional: compatibility alias for older Orion code
     def embed(self, texts):
         return self.model.encode(
-            texts,
-            convert_to_numpy=True,
-            normalize_embeddings=True
+            texts, convert_to_numpy=True, normalize_embeddings=True
         ).tolist()
 
 

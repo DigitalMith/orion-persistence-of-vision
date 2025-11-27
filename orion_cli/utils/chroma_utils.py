@@ -20,7 +20,7 @@ _fake = types.SimpleNamespace(
     opentelemetry=lambda *args, **kwargs: None,
 )
 
-# Replace telemetry modules BEFORE Chroma loads them
+# Replace telemetry modules BEFORE Chroma loads them # ruff: noqa: E402
 sys.modules["chromadb.telemetry"] = _fake
 sys.modules["chromadb.telemetry.posthog"] = _fake
 sys.modules["chromadb.utils.telemetry"] = _fake
@@ -28,12 +28,9 @@ sys.modules["chromadb.utils.telemetry"] = _fake
 # -------------------------------------------------------------
 # Normal imports
 # -------------------------------------------------------------
-from pathlib import Path
 import os
-import json
 
 from chromadb import PersistentClient
-from chromadb.config import Settings
 
 from orion_cli.utils.embedding import EMBED_FN
 
@@ -54,12 +51,13 @@ def get_client():
 # -------------------------------------------------------------
 def _get_or_create(client, name, embed_fn=None):
     """
-    Get or create a Chroma collection using the correct embedding function.
+    Get or create a Chroma collection with COSINE similarity enabled.
     """
     if embed_fn is None:
         embed_fn = EMBED_FN
 
     return client.get_or_create_collection(
         name=name,
-        embedding_function=embed_fn
+        embedding_function=embed_fn,
+        metadata={"hnsw:space": "cosine"},  # enable cosine similarity
     )

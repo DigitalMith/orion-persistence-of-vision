@@ -6,6 +6,7 @@ from datetime import datetime
 # Local-only normalization of chat logs (no OpenAI, no tags)
 # ---------------------------------------------------------
 
+
 def _timestamp_from_stem(stem: str) -> str:
     """
     Convert filenames like '20251111-05-29-01' to ISO timestamps:
@@ -24,6 +25,7 @@ def _timestamp_from_stem(stem: str) -> str:
         except ValueError:
             return ""
 
+
 def normalize_entries(file_path):
     with open(file_path, "r", encoding="utf-8") as f:
         raw = json.load(f)
@@ -39,7 +41,10 @@ def normalize_entries(file_path):
     entries = []
     for i in range(len(messages) - 1):
         user_msg, reply_msg = messages[i], messages[i + 1]
-        if user_msg.get("role") == "user" and reply_msg.get("role") in ["assistant", "Orion"]:
+        if user_msg.get("role") == "user" and reply_msg.get("role") in [
+            "assistant",
+            "Orion",
+        ]:
             entries.append(
                 {
                     "user": user_msg["content"],
@@ -49,7 +54,7 @@ def normalize_entries(file_path):
                 }
             )
     return entries
-    
+
 
 def load_json(path: Path):
     """Load a JSON file safely."""
@@ -105,7 +110,10 @@ def normalize_chat_file(path: Path):
     entries = []
     for i in range(len(messages) - 1):
         user_msg, reply_msg = messages[i], messages[i + 1]
-        if user_msg.get("role") == "user" and reply_msg.get("role") in ["assistant", "Orion"]:
+        if user_msg.get("role") == "user" and reply_msg.get("role") in [
+            "assistant",
+            "Orion",
+        ]:
             entries.append(
                 {
                     "user": user_msg["content"],
@@ -115,8 +123,8 @@ def normalize_chat_file(path: Path):
                     "metadata": {
                         "timestamp": datetime.utcnow().isoformat(),
                         "importance": 0.5,
-                        "source": "normalized_chat"
-                    }
+                        "source": "normalized_chat",
+                    },
                 }
             )
     return entries

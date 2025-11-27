@@ -14,7 +14,11 @@ def main():
 
     output_file = out_dir / "normalized_logs.jsonl"
 
-    files = sorted(p for p in ingest_dir.glob("*.json") if p.name not in {"mock_compatible.json", "persona.yaml"})
+    files = sorted(
+        p
+        for p in ingest_dir.glob("*.json")
+        if p.name not in {"mock_compatible.json", "persona.yaml"}
+    )
     print(f"[normalize] Found {len(files)} ingest logs in {ingest_dir}")
 
     total_pairs = 0

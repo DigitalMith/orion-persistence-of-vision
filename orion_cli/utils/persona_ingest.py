@@ -1,197 +1,162 @@
-import click
 import yaml
-import json
+import uuid
+from orion_cli.utils.chroma_utils import get_client, EMBED_FN, _get_or_create
 
-from orion_cli.orion_ltm_integration import initialize_chromadb_for_ltm, EMBED_FN
-from orion_cli.utils.embedding import EMBED_FN
-from orion_cli.core.ltm import add_documents_to_collection
-from datetime import datetime
+DEFAULT_IMPORTANCE = 0.7  # Option B
 
-
-def load_yaml_documents(path):
-    with open(path, "r", encoding="utf-8") as f:
-        return list(yaml.safe_load_all(f))
+# -------------------------------
+# FLATTEN HELPER
+# -------------------------------
 
 
-def normalize_metadata(doc):
-    """Flatten lists and sanitize metadata keys for Chroma."""
+def flatten_metadata(block: dict):
+    """Flatten all non-text fields into metadata."""
     meta = {}
-    if not isinstance(doc, dict):
-        return meta
-
-    for key, val in doc.items():
-        if isinstance(val, list):
-            meta[key] = ", ".join(str(v) for v in val)
-        elif isinstance(val, (str, int, float, bool)):
-            meta[key] = val
-        else:
-            # skip nested dicts or non-serializable types
+    for k, v in block.items():
+        if k == "text":
             continue
+        if k == "metadata":
+            # merge inner metadata first
+            for mk, mv in v.items():
+                meta[mk] = mv
+        else:
+            meta[k] = v
     return meta
 
 
-def ingest_yaml(path: str, kind: str = "persona", replace=True):
-    """Ingest either YAML, JSON, or JSONL into ChromaDB depending on file extension."""
-    documents = []
+# -------------------------------
+# NORMALIZATION LOGIC
+# -------------------------------
 
-    # --- Choose parser based on file type ---
-    lower_path = str(path).lower()
 
-    if lower_path.endswith(".jsonl"):
-        print(f"[orion_cli] Detected JSONL file: {path}")
-        with open(path, "r", encoding="utf-8") as f:
-            for line in f:
-                line = line.strip()
-                if not line:
-                    continue
-                try:
-                    documents.append(json.loads(line))
-                except json.JSONDecodeError as e:
-                    print(f"⚠️ Skipping malformed JSONL line: {e}")
+def normalize_persona_entry(raw):
+    """
+    Converts ANY persona block into:
+    {
+        "id": <uuid>,
+        "text": <str>,
+        "metadata": { ... flattened ... }
+    }
+    """
 
-    elif lower_path.endswith(".json"):
-        print(f"[orion_cli] Detected JSON file: {path}")
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            # ensure list of dicts
-            documents = data if isinstance(data, list) else [data]
-            print(f"[orion_cli] Loaded {len(documents)} JSON documents")
-        except Exception as e:
-            print(f"⚠️ Failed to parse JSON file {path}: {e}")
-            return
+    if not isinstance(raw, dict):
+        raise ValueError(f"Invalid persona entry: {raw}")
 
+    if "text" not in raw:
+        raise ValueError(f"Persona block missing 'text': {raw}")
+
+    text = str(raw["text"]).strip()
+    if not text:
+        raise ValueError("Persona entry has empty text.")
+
+    # Flatten metadata
+    metadata = flatten_metadata(raw)
+
+    # Fix importance
+    importance = metadata.get("importance", None)
+    if importance is None:
+        metadata["importance"] = DEFAULT_IMPORTANCE
     else:
-        print(f"[orion_cli] Detected YAML file: {path}")
         try:
-            with open(path, "r", encoding="utf-8") as f:
-                documents = list(yaml.safe_load_all(f))
-            print(f"[orion_cli] Loaded {len(documents)} YAML documents")
+            metadata["importance"] = float(importance)
+        except Exception:
+            metadata["importance"] = DEFAULT_IMPORTANCE
+
+    # Tag as persona
+    metadata.setdefault("source", "persona")
+
+    return {
+        "id": str(uuid.uuid4()),
+        "text": text,
+        "metadata": metadata,
+    }
+
+
+# -------------------------------
+# YAML LOADER
+# -------------------------------
+
+
+def load_persona_yaml(path: str):
+    """
+    Loads multi-document YAML.
+    Returns a list of raw persona blocks.
+    """
+    with open(path, "r", encoding="utf-8") as f:
+        docs = list(yaml.safe_load_all(f))
+
+    out = []
+
+    for doc in docs:
+        if doc is None:
+            continue
+
+        if isinstance(doc, list):
+            # Flat list of persona snippets
+            for item in doc:
+                if isinstance(item, dict):
+                    out.append(item)
+                else:
+                    raise ValueError(f"List contains non-dict item: {item}")
+
+        elif isinstance(doc, dict):
+            # Single structured persona block
+            out.append(doc)
+
+        else:
+            raise ValueError(f"Unexpected YAML structure: {doc}")
+
+    return out
+
+
+# -------------------------------
+# INGESTION PIPELINE
+# -------------------------------
+
+
+def ingest_persona_yaml(path: str):
+    """
+    Main ingestion function.
+    Loads persona blocks → normalizes → ingests into Chroma.
+    """
+
+    raw_blocks = load_persona_yaml(path)
+    normalized = []
+
+    for block in raw_blocks:
+        try:
+            norm = normalize_persona_entry(block)
+            normalized.append(norm)
         except Exception as e:
-            print(f"⚠️ Failed to parse YAML file {path}: {e}")
-            return
+            print(f"[WARN] Skipping persona entry due to error: {e}")
 
-    # Convert loaded JSON docs into ingestable "blocks"
-    blocks = []
-    for doc in documents:
-        if isinstance(doc, dict):
-            user = doc.get("user")
-            orion = doc.get("orion")
-            text = (
-                f"User: {user}\nOrion: {orion}"
-                if user and orion
-                else json.dumps(doc, ensure_ascii=False)
-            )
-            meta = {
-                "source": kind,
-                "timestamp": doc.get("timestamp", ""),
-                "importance": 0.7,
-            }
-            blocks.append({"text": text, "metadata": meta})
+    if not normalized:
+        raise RuntimeError("No valid persona entries found in YAML.")
 
-    print(
-        f"[orion_cli] Ingesting {len(blocks)} entries into ChromaDB under '{kind}' collection"
-    )
+    client = get_client()
+    coll = _get_or_create(client, "persona", EMBED_FN)
 
-    # ✅ Generate embeddings
-    texts = [b["text"] for b in blocks]
-    embeddings = EMBED_FN.embed_documents(texts)
+    # Clear old persona to avoid duplicates
+    try:
+        coll.delete()
+        coll = _get_or_create(client, "persona", EMBED_FN)
+    except Exception as e:
+        print(f"[WARN] Could not clear old persona: {e}")
 
-    for i, b in enumerate(blocks):
-        b["embedding"] = embeddings[i]
+    # Insert
+    ids = [x["id"] for x in normalized]
+    texts = [x["text"] for x in normalized]
+    metas = [x["metadata"] for x in normalized]
 
-    # ✅ Debug output for first few entries
-    print(f"[DEBUG] Blocks to ingest: {len(blocks)}")
-    for i, b in enumerate(blocks[:3]):
-        print(f"[DEBUG] Block {i}:")
-        print(f"  Text: {b['text'][:60]}...")
-        print(f"  Metadata: {b['metadata']}")
-        print(f"  Embedding length: {len(b['embedding'])}")
+    coll.add(ids=ids, documents=texts, metadatas=metas)
 
-    # ✅ Initialize ChromaDB collections
-    persona_coll, episodic_coll = initialize_chromadb_for_ltm(EMBED_FN)
-    collection = persona_coll if kind == "persona" else episodic_coll
+    print("\n[PERSONA INGEST COMPLETE]")
+    print(f"Loaded entries: {len(normalized)}")
+    print(f"Source: {path}\n")
 
-    # ✅ Timestamp normalization
-    for b in blocks:
-        meta = b.get("metadata", {})
-        ts = b.get("timestamp")
-        src = b.get("source_file", "")
-        if src and not meta.get("timestamp"):
-            try:
-                base = src.replace(".json", "").split("\\")[-1]
-                dt = datetime.strptime(base, "%Y%m%d-%H-%M-%S")
-                meta["timestamp"] = dt.isoformat()
-            except Exception:
-                meta["timestamp"] = datetime.now().isoformat()
-        elif ts and not meta.get("timestamp"):
-            try:
-                meta["timestamp"] = datetime.strptime(ts, "%Y%m%d").isoformat()
-            except Exception:
-                meta["timestamp"] = datetime.now().isoformat()
-        b["metadata"] = meta
+    # Preview first 3
+    for p in normalized[:3]:
+        print(f"- {p['text'][:120]}...")
+    print()
 
-    # ✅ Safe ingest
-    add_documents_to_collection(collection, blocks, replace=replace)
-    print(f"[orion_cli] ✅ {kind.capitalize()} ingest complete.")
-
-
-@click.group()
-def cli():
-    pass
-
-
-@cli.command("persona")
-@click.option(
-    "--path",
-    required=True,
-    type=click.Path(exists=True),
-    help="Path to persona YAML file.",
-)
-@click.option("--replace", is_flag=True, help="Replace existing ChromaDB entries.")
-def persona_ingest(path, replace):
-    """Ingest persona YAML into ChromaDB."""
-    ingest_yaml(path=path, kind="persona", replace=replace)
-
-
-@cli.command("mock")
-@click.option(
-    "--path",
-    required=True,
-    type=click.Path(exists=True),
-    help="Path to mock dialog YAML file.",
-)
-@click.option("--replace", is_flag=True, help="Replace existing ChromaDB entries.")
-def mock_ingest(path, replace):
-    """Ingest mock dialog YAML into ChromaDB."""
-    ingest_yaml(path=path, kind="mock", replace=replace)
-
-
-# ----------------------------------------------------------------------
-# Orion ingest wrappers for programmatic calls (used by orion_ingest.py)
-# ----------------------------------------------------------------------
-
-
-def ingest_persona():
-    """Wrapper to load default persona.yaml and ingest into ChromaDB."""
-    default_path = "orion_cli/data/ingest/persona.yaml"
-    print(f"[persona_ingest] Using default path: {default_path}")
-    ingest_yaml(path=default_path, kind="persona", replace=True)
-
-
-def ingest_mock_dialogs():
-    """Wrapper to load default mock_orian_dialog.json and ingest into ChromaDB."""
-    default_path = "orion_cli/data/ingest/mock_orian_dialog.json"
-    print(f"[persona_ingest] Using default path: {default_path}")
-    ingest_yaml(path=default_path, kind="mock", replace=True)
-
-
-def ingest_ltm():
-    """Wrapper for normalized long-term memory logs."""
-    default_path = "orion_cli/data/ingest/normalized_logs.jsonl"
-    print(f"[persona_ingest] Using default path: {default_path}")
-    ingest_yaml(path=default_path, kind="ltm", replace=True)
-
-
-if __name__ == "__main__":
-    cli()
+    return len(normalized)

@@ -50,9 +50,9 @@ def ltm_ingest(
     replace: bool = typer.Option(False, help="Replace existing memory entries."),
 ):
     """Ingest dialogs as LTM entries into ChromaDB."""
-    from orion_cli.scripts.pooled_ltm_ingest import ingest_pooled
+    # from orion_cli.scripts.pooled_ltm_ingest import ingest_pooled
 
-    ingest_pooled(source=source, pool_size=pool_size, replace=replace)
+    # ingest_pooled(source=source, pool_size=pool_size, replace=replace)
 
 
 @cli.command("persona-ingest")

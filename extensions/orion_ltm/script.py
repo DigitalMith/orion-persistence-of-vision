@@ -14,14 +14,24 @@ _persona = _episodic = None
 
 # Load configuration safely
 try:
-    cfg = get_config()
+    CONFIG = get_config()
 except Exception as e:
-    logger.warning(f"[orion_ltm] ⚠️ Failed to load config: {e}")
-    cfg = {"debug_enabled": False, "debug_show_recall": False}
+    logger.warning(f"[orion_ltm] ⚠️ Failed to load config.yaml: {e}")
+    # Safe fallback: debug disabled
+    CONFIG = {
+        "debug": {
+            "enabled": False,
+            "show_recall": False,
+            "short_descriptions": False,
+            "episodic_store": False,
+            "episodic_recall": False,
+        }
+    }
 
 # === Optional Debug Recall Snapshot ===
 # Only runs if explicitly enabled in config.yaml
-if cfg.get("debug_enabled") and cfg.get("debug_show_recall"):
+debug_cfg = CONFIG.get("debug", {})
+if debug_cfg.get("enabled") and debug_cfg.get("show_recall"):
     try:
         print("\n[DEBUG] === Orion LTM Recall Snapshot ===")
 
@@ -95,11 +105,12 @@ def setup():
 
     try:
         from orion_cli.utils.embedding import EMBED_FN
-        from orion_cli.orion_ltm_integration import (
+        from orion_cli.shared.memory import (
             initialize_chromadb_for_ltm,
             get_relevant_ltm,
+            on_user_turn,
+            on_assistant_turn,
         )
-        from orion_cli.shared.memory import on_user_turn, on_assistant_turn
 
         # 🧠 initialize_chromadb_for_ltm returns (persona, episodic)
         _persona, _episodic = initialize_chromadb_for_ltm(EMBED_FN)
@@ -113,6 +124,121 @@ def setup():
         )
     except Exception as e:
         logger.error(f"[orion_ltm] ❌ setup() failed: {e}")
+
+
+# ============================================================
+# Hook: Inject LTM Recall into user prompt before model sees it
+# ============================================================
+
+def input_modifier(*args, **kwargs):
+    """
+    TGWUI hook: runs before the model sees the user message.
+    This is where we run recall() and prepend memory hits.
+
+    We accept *args, **kwargs to be robust against different
+    TGWUI extension calling conventions.
+    """
+
+    # Extract text + state safely from args/kwargs
+    text = args[0] if len(args) >= 1 else ""
+    state = args[1] if len(args) >= 2 and isinstance(args[1], dict) else kwargs.get("state", {})
+
+    if not isinstance(text, str):
+        text = str(text)
+
+    # If the embedding system isn't ready, return unchanged
+    if not _EMBED_READY or _persona is None or _episodic is None:
+        return text
+
+    try:
+        # Preferred path: new API with return_debug
+        try:
+            memory_text, dbg = get_relevant_ltm(
+                text,
+                _persona,
+                _episodic,
+                topk_persona=int(CONFIG.get("ltm", {}).get("topk_persona", 5)),
+                topk_episodic=int(CONFIG.get("ltm", {}).get("topk_episodic", 10)),
+                return_debug=True,
+            )
+        except TypeError:
+            # Fallback for older versions: no return_debug supported
+            memory_text = get_relevant_ltm(text, _persona, _episodic)
+            dbg = {}
+
+    except Exception as e:
+        logger.error(f"[orion_ltm] recall hook failed: {e}")
+        return text
+
+    if not memory_text:
+        return text
+
+    # Debug print if enabled via config.yaml
+    debug_cfg = CONFIG.get("debug", {})
+    if debug_cfg.get("enabled") and debug_cfg.get("show_recall"):
+        logger.debug("=== Orion LTM Recall Snapshot ===")
+
+        persona_hits = dbg.get("persona") or []
+        episodic_hits = dbg.get("episodic") or []
+
+        if persona_hits:
+            logger.debug("--- Persona Recall ---")
+            for i, item in enumerate(persona_hits[:3]):
+                doc = (item.get("doc") or "")[:200]
+                logger.debug(f"[{i}] {doc}...")
+
+        if episodic_hits:
+            logger.debug("--- Episodic Recall ---")
+            for i, item in enumerate(episodic_hits[:3]):
+                doc = (item.get("doc") or "")[:200]
+                logger.debug(f"[{i}] {doc}...")
+
+        if not persona_hits and not episodic_hits:
+            # At least show the raw memory_text if debug is on
+            logger.debug("(no structured hits; raw memory text)")
+            logger.debug(memory_text[:400])
+
+        logger.debug("==========================")
+
+    # Prepend memory to user prompt
+    return memory_text + "\n\n" + text
+
+
+def output_modifier(*args, **kwargs):
+    """
+    Persist assistant replies as episodic memory (best-effort).
+
+    Called on model outputs; we use it to feed Orion's episodic memory.
+    We accept *args, **kwargs so we don't depend on a specific TGWUI
+    calling convention.
+    """
+    text = args[0] if len(args) >= 1 else ""
+    state = args[1] if len(args) >= 2 and isinstance(args[1], dict) else kwargs.get("state", {})
+
+    try:
+        reply = (text or "").strip()
+        if not reply or len(reply.split()) < 10 or _episodic is None:
+            return text
+
+        last_user = ""
+        if isinstance(state, dict):
+            last_user = (state.get("context") or "").strip()
+
+        on_assistant_turn(reply, _episodic, last_user_input=last_user)
+
+    except Exception as e:
+        logger.error(f"[orion_ltm] output_modifier failed: {e}")
+
+    return text
+
+
+# ------------------------------------------------------------
+# Setup runs when the extension loads
+# ------------------------------------------------------------
+try:
+    setup()
+except Exception as e:
+    logger.error(f"[orion_ltm] Setup failed during extension load: {e}")
 
 
 def teardown():
@@ -212,46 +338,11 @@ def _inject_ltm_into_state_sys_prompt(state, text=None):
             )
         )
 
-    if structured_memory:
-        sys_prompt = (
-            f"{sys_prompt}\n\n[LTM CONTEXT]\n" + "\n".join(structured_memory).strip()
-        )
+EXTENSION = {
+    "input": input_modifier,
+    "output": output_modifier,
+}
 
-    state["system_prompt"] = sys_prompt
-    return state
-
-
-def _inject_ltm_into_state_sys_prompt(state, text=None):
-    # No-op fallback if not using special LTM injections
-    return state
-
-
-def custom_generate_chat_prompt(user_input, state, **kwargs):
-    """Official TGWUI hook: adjust state/system_prompt then delegate."""
-    text = (
-        user_input
-        if isinstance(user_input, str)
-        else (getattr(user_input, "text", "") or "")
-    )
-    state = dict(state or {})
-    state = _inject_ltm_into_state_sys_prompt(state, text)
-    return chat.generate_chat_prompt(user_input, state, **kwargs)
-
-
-def output_modifier(text, state):
-    """Persist assistant replies as episodic memory (best-effort)."""
-    try:
-        reply = (text or "").strip()
-        query = (state.get("context") or "").strip()
-
-        if reply and len(reply.split()) >= 10:
-            on_assistant_turn(reply, _episodic, last_user_input=query)
-    except Exception as e:
-        print(f"[orion_ltm] output_modifier failed: {e}")
-    return text
-
-
-# Ensure memory collections are initialized on extension load
 try:
     setup()
 except Exception as e:

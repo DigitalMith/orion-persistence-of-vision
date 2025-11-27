@@ -23,6 +23,6 @@ ltm:
 
 # enables live pooling of user + assistant chat to LTM. May delay dialog for enhanced tone and emotion weighing.
 
-ltm:
-  live_pooled_ingest: true
-  pooling_turns: 3
+# ltm:
+  # live_pooled_ingest: true
+  # pooling_turns: 3

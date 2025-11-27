@@ -11,9 +11,13 @@ REGISTRY = {
         "intfloat": BASE_DIR / "orion_cli" / "models" / "embeddings" / "intfloat",
     },
     "llm": {
-        "orion": BASE_DIR / "user_data" / "models" / "openhermes-2.5-mistral-7b.Q5_K_M.gguf",
+        "orion": BASE_DIR
+        / "user_data"
+        / "models"
+        / "openhermes-2.5-mistral-7b.Q5_K_M.gguf",
     },
 }
+
 
 def resolve_embed(name: str):
     """
