@@ -10,7 +10,7 @@
 </p>
 ---
 
-[![Version](https://img.shields.io/badge/version-3.48.0-purple)]()
+[![Version](https://img.shields.io/badge/version-3.49.0-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -23,7 +23,7 @@
 
 ## Version
 
-**Current project version: `3.48.0`**
+**Current project version: `3.49.0`**
 
 This release introduces:
 

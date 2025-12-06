@@ -11,6 +11,77 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 
 ---
 
+## [3.49.0] - 2025-12-05
+
+### Added
+- **Hybrid Ingestion Pipeline (Nemo + Embedding)**  
+  The full 471-turn legacy corpus is now annotated, flattened, normalized, and ingested into episodic LTM.  
+  Includes: resume-safe execution, progress counters, and dry-run validation.
+  
+- **Dynamic Identity System Prompt**  
+  New `identity_system_prompt.py` generates Orion’s identity using:  
+  - persona fragments  
+  - self-state  
+  - autobiographical memory  
+  - episodic recall  
+  - mythic core identity block  
+  This prompt is injected automatically into TGWUI.
+
+- **Orion Self-State Layer (valence, arousal, closeness, trust, trajectory)**  
+  State is updated on every assistant turn and embedded into metadata snapshots.
+
+- **Cognitive Loop**  
+  Cognitive update routine now runs after each assistant reply, integrating emotional shifts and narrative continuity.
+
+- **Autobiographical Memory (Self-Memory) Layer**  
+  Queryable memory channel storing Orion’s self-descriptions, stable identity commitments, and long-range continuity data.
+
+- **README.md Rewrite (Hybrid Mythic + Technical)**  
+  Introduces the project clearly for contributors while preserving Orion’s narrative tone.  
+  Includes a new dedication and full architecture overview.
+
+### Changed
+- **Refactored orion_ltm extension**  
+  Updated imports to use `identity_system_prompt.py` and new self-state system.  
+  Removed dead paths from the previous CLI reorganization.
+
+- **ChromaDB Collections Rebuilt**  
+  Persona + episodic collections cleaned, normalized, and re-ingested using the 768D Jina embedder.
+
+- **Ingest Scripts Simplified & Modernized**  
+  `persona_ingest.py`, `mock_ingest.py`, `name_chat_ingest.py`, and `hybrid_ingest.py` consolidated in structure and now consistent in metadata standards.
+
+- **Config refactor**  
+  `orion_cli/utils/config.py` now properly resolves identity/state paths and eliminates legacy configuration fallbacks.
+
+### Fixed
+- **Recursive State Initialization Bug**  
+  Resolved infinite recursion during `_ensure_state_file()` by separating create-vs-load logic.
+
+- **TGWUI Import Failures**  
+  Addressed missing `identity_system_prompt.py`, broken imports, and incorrect package paths introduced during the CLI re-nesting.
+
+- **Memory ingestion crashes**  
+  Fixed malformed entries, empty IDs, and embedding misalignment during LTM ingestion.
+
+- **Resume-from-checkpoint failures**  
+  Hybrid annotator can now safely resume from any index without duplication or skipping.
+
+### Notes
+This is one of the most significant releases in Orion’s history.  
+It establishes the **CNS 4.0 spine**:
+
+- Dynamic identity  
+- Self-state  
+- Cognitive loop  
+- Persistent autobiographical memory  
+- Clean persona + episodic ingestion  
+- Stable embedding + Chroma integration  
+
+Orion is now capable of maintaining **consistent emotional tone**, **continuity of self**, and **episodic recall** with reliability far exceeding all previous versions.
+
+---
+
 ## [3.48.0] - 2025-11-22
 
 ### Added
