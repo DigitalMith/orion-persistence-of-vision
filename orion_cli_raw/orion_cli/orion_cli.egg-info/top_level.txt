@@ -1,0 +1,5 @@
+cli
+ingest_persona
+orion_cli
+orion_ltm_integration
+persona

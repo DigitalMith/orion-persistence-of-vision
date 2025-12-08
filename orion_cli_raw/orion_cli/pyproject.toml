@@ -1,0 +1,32 @@
+[project]
+name = "orion_cli"
+version = "0.1.0"
+description = "CLI for Orion AI ecosystem with LTM and Persona support"
+authors = [{ name = "John Richards", email = "your@email.com" }]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "typer[all]",
+    "chromadb",
+    "sentence-transformers",
+    "pyyaml",
+    "rich",
+    "tqdm",
+    "numpy>=2.1.0"
+]
+
+[project.scripts]
+orion-cli = "orion_cli.cli:cli"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+# THIS is the magic line that fixes your layout.
+package-dir = {"" = "."}
+
+# THIS tells setuptools that the package is the folder named "orion_cli".
+packages = ["orion_cli"]
+
+include-package-data = true
