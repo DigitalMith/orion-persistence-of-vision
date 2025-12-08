@@ -44,6 +44,22 @@ models/*
 orion_cli/models/embeddings/*
 !orion_cli/models/embeddings/.gitkeep
 
-
 installer_files/env/
 orion_cli/.env
+.git_backup_before_bfg/
+
+# === Include CLI source ===
+!user_data/orion_cli/
+!user_data/orion_cli/**/*.py
+!user_data/orion_cli/pyproject.toml
+!user_data/orion_cli/README.md
+
+# === Exclude runtime directories ===
+user_data/orion_cli/chromadb/
+user_data/orion_cli/hf_cache/
+user_data/orion_cli/embeddings/
+user_data/orion_cli/__pycache__/
+
+# === Exclude user-owned runtime configs ===
+user_data/orion_cli/*.yaml
+user_data/orion_cli/*.json
