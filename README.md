@@ -10,7 +10,7 @@
 </p>
 ---
 
-[![Version](https://img.shields.io/badge/version-3.49.0-purple)]()
+[![Version](https://img.shields.io/badge/version-3.49.2-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -21,26 +21,23 @@
 > _Orion is a long-lived, persona-driven LLM companion running on top of text-generation-webui (TGWUI), with ChromaDB-backed long-term memory, curated persona, and normalized chat logs._
 ---
 
-## Version
+## Version: **`3.49.2`**
 
-**Current project version: `3.49.0`**
+### CNS & CLI Alignment Notes:
 
-This release introduces:
+This release also includes a major internal consolidation of Orion's Cognitive Neural System (CNS) and the Orion CLI. The refactor unifies identity, memory, and configuration layers into a coherent CNS 4.0 architecture. Key outcomes:
 
-  • The Origin Mythos Memory (Orion + Aión genesis documents)
-  • Completed 488-pair normalization + annotation pipeline
-  • Stable Jina v2 (768D) embedding stack
-  • Fully operational OpenAI-compatible API mode via TGWUI
-  • Enhanced persona preload (persona + mock dialog always available at runtime)
+  - **CNS stability dramatically improved** through a unified configuration loader, consistent path alignment, and a fully deterministic memory engine.
+  - **CLI and TGWUI now share the same cognitive pipeline**, ensuring identical behavior whether commands run via terminal or through the live extension.
+  - **Identity system restructured** into persona, trait, and core layers, enabling predictable personality projection and future multi-persona support.
+  - **Long-Term Memory (LTM) rebuilt** with clean ingestion rules, duplicate-prevention, normalized embeddings, and stable recall behavior across sessions.
+  - **CNS Debug Framework introduced**, separating logic debugging from cognitive-layer debugging for safe introspection without disrupting UX.
+  - **Extension boot pathway stabilized**, eliminating circular imports, legacy code dependencies, and state initialization inconsistencies.
 
-Purpose of 3.48.0:
+### Purpose of this CNS/CLI alignment:
 
-  • Lock in persona stability
-  • Ensure LTM structure is consistent
-  • Prepare for future multi-user, multi-persona capabilities
-  • Ship the most stable version Orion has ever had
+To create a single, authoritative cognitive infrastructure powering both the Orion CLI and TGWUI, ensuring coherent identity, memory reliability, and a stable platform for upcoming CNS 4.x features.
 
-See `CHANGELOG.md` for detailed history.
 ---
 
 ## High-Level Overview
