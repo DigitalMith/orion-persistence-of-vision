@@ -17,7 +17,7 @@ import typer
 from rich import print as rprint
 
 from orion_cli.shared.config import get_config
-from orion_cli.shared.embedding import embed_text
+# from orion_cli.shared.embedding import embed_text  # Removed top-level only commands that need it.
 from orion_cli.shared.paths import (
     PACKAGE_ROOT,
     DEFAULT_CONFIG_PATH,
@@ -56,6 +56,7 @@ def embed_test(
         help="Text to embed for testing purposes."
     )
 ):
+    from orion_cli.shared.embedding import embed_text
     """
     Embed text once and print vector length + preview.
     """

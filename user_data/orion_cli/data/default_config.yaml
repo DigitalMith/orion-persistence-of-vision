@@ -15,3 +15,9 @@ embedding_model: "jinaai/jina-embeddings-v2-base-en"
 embedding_dim: 768
 
 debug_mode: false
+
+profile: orion_main
+profiles_root: user_data/orion/profiles
+
+identity_path: user_data/orion_cli/data/orion_identity.yaml
+persona_path:  user_data/orion_cli/data/orion_persona.yaml

@@ -25,6 +25,7 @@ from functools import lru_cache
 from typing import List
 
 from sentence_transformers import SentenceTransformer
+from chromadb.utils.embedding_functions import EmbeddingFunction
 
 from orion_cli.shared.config import get_config
 from orion_cli.shared.utils import normalize_text
@@ -83,14 +84,25 @@ def embed_text(text: str) -> List[float]:
 # ChromaDB callback interface
 # -------------------------------------------------------------
 
-def EMBED_FN(texts: List[str]) -> List[List[float]]:
+class OrionEmbeddingFunction(EmbeddingFunction):
     """
-    Embedding function supplied directly to ChromaDB.
-    Accepts a list of strings and returns a list of embedding vectors.
+    Adapter that makes our embedding system compatible with Chroma's
+    EmbeddingFunction protocol:
+
+        __call__(self, input: List[str]) -> List[List[float]]
     """
-    model = _load_model()
-    cleaned = [normalize_text(t) for t in texts]
-    return model.encode(cleaned).tolist()
+
+    def __call__(self, input: List[str]) -> List[List[float]]:
+        if not isinstance(input, list):
+            raise TypeError(f"Expected list[str] for input, got {type(input)!r}")
+
+        model = _load_model()
+        cleaned = [normalize_text(t) for t in input]
+        return model.encode(cleaned).tolist()
+
+
+# This is what memory_core passes to Chroma
+EMBED_FN = OrionEmbeddingFunction()
 
 
 __all__ = [

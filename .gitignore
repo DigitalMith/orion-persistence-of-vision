@@ -48,18 +48,23 @@ installer_files/env/
 orion_cli/.env
 .git_backup_before_bfg/
 
+# === Orion CNS runtime data (global) — never commit ===
+user_data/orion/chromadb/
+user_data/orion/hf_cache/
+user_data/orion/embeddings/
+user_data/orion/__pycache__/
+
+# === Private identity / persona / local config (user-owned) ===
+user_data/orion/data/identity.yaml
+user_data/orion/data/persona.yaml
+user_data/orion/data/config.local.yaml
+user_data/orion/data/*.local.yaml
+
 # === Include CLI source ===
 !user_data/orion_cli/
 !user_data/orion_cli/**/*.py
 !user_data/orion_cli/pyproject.toml
 !user_data/orion_cli/README.md
 
-# === Exclude runtime directories ===
-user_data/orion_cli/chromadb/
-user_data/orion_cli/hf_cache/
-user_data/orion_cli/embeddings/
-user_data/orion_cli/__pycache__/
-
 # === Exclude user-owned runtime configs ===
-user_data/orion_cli/*.yaml
 user_data/orion_cli/*.json

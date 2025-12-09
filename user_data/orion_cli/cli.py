@@ -17,12 +17,19 @@ Commands are intentionally thin orchestrators.
 from __future__ import annotations
 
 import typer
+import warnings
 
 from orion_cli.commands.memory import app as memory_app
 from orion_cli.commands.identity import app as identity_app
 from orion_cli.commands.ingest import app as ingest_app
 from orion_cli.commands.tools import app as tools_app
 
+
+warnings.filterwarnings(
+    "ignore",
+    category=FutureWarning,
+    message="Using `TRANSFORMERS_CACHE` is deprecated and will be removed in v5 of Transformers. Use `HF_HOME` instead.",
+)
 
 # Root CLI application
 app = typer.Typer(

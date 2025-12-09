@@ -48,6 +48,8 @@ USER_IDENTITY_PATH = USER_DATA_DIR / "identity.yaml"
 # -------------------------------------------------------------------
 CHROMA_DIR = USER_ORION_DIR / "chromadb"
 CHROMA_DIR.mkdir(exist_ok=True)
+# Backwards-compat aliases for older code
+DEFAULT_CHROMA_PATH = CHROMA_DIR
 
 
 # -------------------------------------------------------------------
@@ -66,6 +68,7 @@ EMBEDDING_MODEL_DIR.mkdir(exist_ok=True)
 # -------------------------------------------------------------------
 HF_CACHE_DIR = USER_ORION_DIR / "hf_cache"
 HF_CACHE_DIR.mkdir(exist_ok=True)
+DEFAULT_HF_CACHE_PATH = HF_CACHE_DIR  # if anything expects it
 
 
 # -------------------------------------------------------------------
