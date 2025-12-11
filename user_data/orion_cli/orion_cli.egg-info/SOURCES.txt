@@ -3,6 +3,7 @@ __init__.py
 cli.py
 pyproject.toml
 ./__init__.py
+./build_cli_doc.py
 ./cli.py
 orion_cli.egg-info/PKG-INFO
 orion_cli.egg-info/SOURCES.txt

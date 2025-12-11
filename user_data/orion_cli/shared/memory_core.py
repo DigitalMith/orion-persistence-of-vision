@@ -26,6 +26,7 @@ from chromadb.config import Settings
 from orion_cli.shared.config import get_config
 from orion_cli.shared.embedding import EMBED_FN, embed_text
 from orion_cli.shared.utils import normalize_text
+from orion_cli.shared.paths import CHROMA_DIR, PACKAGE_ROOT, USER_ORION_DIR, HF_CACHE_DIR
 
 
 # -------------------------------------------------------------
@@ -33,14 +34,41 @@ from orion_cli.shared.utils import normalize_text
 # -------------------------------------------------------------
 
 def _resolve_chroma_path() -> Path:
+    """
+    Resolve the ChromaDB path with the following precedence:
+
+    1. ORION_CHROMA_DIR env var (absolute or relative)
+    2. config.yaml -> chroma_path (absolute or relative)
+       - relative paths are resolved against the TGWUI project root
+    3. Default CHROMA_DIR from paths.py (user_data/orion/chromadb)
+    """
+
+    # 1) Environment override wins
+    env_raw = os.getenv("ORION_CHROMA_DIR")
+    if env_raw:
+        p = Path(env_raw)
+        if not p.is_absolute():
+            # Resolve relative to TGWUI root
+            tgwui_root = PACKAGE_ROOT.parent.parent
+            p = tgwui_root / p
+        return p.resolve()
+
+    # 2) Config value (may be None / empty / missing)
     cfg = get_config()
-    raw = cfg.chroma_path
+    raw = getattr(cfg, "chroma_path", None)
 
-    # Allow relative paths (common inside TGWUI)
-    if not os.path.isabs(str(raw)):
-        return Path(os.path.join(os.getcwd(), raw)).resolve()
+    if raw:
+        p = Path(str(raw))
 
-    return Path(raw).resolve()
+        if p.is_absolute():
+            return p.resolve()
+
+        # Treat relative chroma_path as relative to TGWUI root
+        tgwui_root = PACKAGE_ROOT.parent.parent
+        return (tgwui_root / p).resolve()
+
+    # 3) Fallback: canonical default
+    return CHROMA_DIR.resolve()
 
 
 # -------------------------------------------------------------
@@ -87,14 +115,6 @@ def _persona():
     return _get_collection(PERSONA_COLLECTION)
 
 
-def _episodic():
-    return _get_collection(EPISODIC_COLLECTION)
-
-
-# -------------------------------------------------------------
-# Ingestion (Persona + Episodic)
-# -------------------------------------------------------------
-
 def add_persona_entry(text: str, metadata: Optional[Dict[str, Any]] = None) -> str:
     """
     Insert a persona document into its collection.
@@ -106,12 +126,17 @@ def add_persona_entry(text: str, metadata: Optional[Dict[str, Any]] = None) -> s
     vector = embed_text(clean)
     new_id = f"persona-{col.count()+1}"
 
-    col.upsert(
+    upsert_kwargs = dict(
         ids=[new_id],
         embeddings=[vector],
         documents=[clean],
-        metadatas=[metadata or {}],
     )
+
+    if metadata is not None:
+        # Chroma v0.5+ requires non-empty dicts if metadatas is provided
+        upsert_kwargs["metadatas"] = [metadata]
+
+    col.upsert(**upsert_kwargs)
 
     return new_id
 
@@ -149,12 +174,16 @@ def add_episodic_entry(
     vector = embed_text(clean)
     new_id = f"episodic-{col.count()+1}"
 
-    col.upsert(
+    upsert_kwargs = dict(
         ids=[new_id],
         embeddings=[vector],
         documents=[clean],
-        metadatas=[metadata or {}],
     )
+
+    if metadata is not None:
+        upsert_kwargs["metadatas"] = [metadata]
+
+    col.upsert(**upsert_kwargs)
 
     return new_id
 
@@ -211,6 +240,29 @@ def memory_stats() -> Dict[str, Any]:
     }
 
 
+def on_user_turn(text: str, **metadata) -> None:
+    """
+    Legacy hook used by the orion_ltm extension for user messages.
+
+    Thin wrapper around add_episodic_entry so CNS 3.x-style extension
+    code keeps working on CNS 4.0.
+    """
+    meta = {"role": "user", "source": "tgwui"}
+    if metadata:
+        meta.update(metadata)
+    add_episodic_entry(text, metadata=meta, min_length=10)
+
+
+def on_assistant_turn(text: str, **metadata) -> None:
+    """
+    Legacy hook used by the orion_ltm extension for assistant messages.
+    """
+    meta = {"role": "assistant", "source": "tgwui"}
+    if metadata:
+        meta.update(metadata)
+    add_episodic_entry(text, metadata=meta, min_length=10)
+
+
 __all__ = [
     "add_persona_entry",
     "add_episodic_entry",
@@ -219,4 +271,6 @@ __all__ = [
     "memory_stats",
     "PERSONA_COLLECTION",
     "EPISODIC_COLLECTION",
+    "on_user_turn",
+    "on_assistant_turn",
 ]

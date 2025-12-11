@@ -1,2 +1,0 @@
-[console_scripts]
-orion-cli = orion_cli.cli:cli
