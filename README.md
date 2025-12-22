@@ -10,7 +10,7 @@
 </p>
 ---
 
-[![Version](https://img.shields.io/badge/version-3.49.2-purple)]()
+[![Version](https://img.shields.io/badge/version-3.50.0-purple)]()
 [![Status](https://img.shields.io/badge/status-beta-orange)]()
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue)]()
 [![License: AGPL-3.0](https://img.shields.io/badge/license-AGPL--3.0-green)]()
@@ -21,7 +21,7 @@
 > _Orion is a long-lived, persona-driven LLM companion running on top of text-generation-webui (TGWUI), with ChromaDB-backed long-term memory, curated persona, and normalized chat logs._
 ---
 
-## Version: **`3.49.2`**
+## Version: **`3.50.0`**
 
 ### CNS & CLI Alignment Notes:
 
