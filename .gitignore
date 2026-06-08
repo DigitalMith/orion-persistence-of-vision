@@ -41,11 +41,11 @@ transformers_cache/
 models/*
 
 # === Embedding models (all excluded; downloaded separately) ===
-orion_cli/models/embeddings/*
-!orion_cli/models/embeddings/.gitkeep
+orion/embeddings/*
+!orion/embeddings/.gitkeep
 
 installer_files/env/
-orion_cli/.env
+user_data/orion_cli/.env
 .git_backup_before_bfg/
 
 # === Orion CNS runtime data (global) — never commit ===
@@ -55,10 +55,10 @@ user_data/orion/embeddings/
 user_data/orion/__pycache__/
 
 # === Private identity / persona / local config (user-owned) ===
-user_data/orion/data/identity.yaml
-user_data/orion/data/persona.yaml
-user_data/orion/data/config.local.yaml
-user_data/orion/data/*.local.yaml
+# user_data/orion/data/identity.yaml
+# user_data/orion/data/persona.yaml
+# user_data/orion/data/config.local.yaml
+# user_data/orion/data/*.local.yaml
 
 # === Include CLI source ===
 !user_data/orion_cli/
@@ -67,4 +67,73 @@ user_data/orion/data/*.local.yaml
 !user_data/orion_cli/README.md
 
 # === Exclude user-owned runtime configs ===
-user_data/orion_cli/*.json
+# user_data/orion_cli/*.json
+
+# BEGIN ORION PHASE07 PUBLICATION SAFETY
+# Local environments and downloaded model artifacts
+venv-orion/
+installer_files/
+user_data/models/
+user_data/loras/
+user_data/training/
+*.gguf
+*.safetensors
+*.ckpt
+*.pt
+*.onnx
+
+# Python and generated package metadata
+**/__pycache__/
+*.py[cod]
+.ruff_cache/
+.pytest_cache/
+user_data/orion_cli/orion_cli.egg-info/
+
+# Orion databases, embeddings, caches, and database backups
+user_data/Chroma-DB/
+user_data/orion/chromadb/
+user_data/orion/chromadb.bak_*/
+user_data/orion/hf_cache/
+user_data/orion/embeddings/
+user_data/orion/backups/
+
+# Runtime conversations and private source material
+user_data/logs/
+user_data/orion/logs/
+user_data/orion/user/
+
+# Runtime state
+user_data/orion/state/*.yaml
+!user_data/orion/state/.gitkeep
+
+# Local Orion identity, memory, and machine-specific configuration
+user_data/orion/data/config.yaml
+user_data/orion/data/config.local.yaml
+user_data/orion/data/*.local.yaml
+user_data/orion/data/identity.yaml
+user_data/orion/data/persona.yaml
+user_data/orion/data/semantic.yaml
+user_data/orion/data/keepsake.yaml
+user_data/orion/data/manual_semantic_seed.jsonl
+user_data/orion/data/agent_prefs.yaml
+user_data/orion/data/agent_tools.yaml
+user_data/orion/data/snapshots_manifest.yaml
+user_data/orion/data/pip_freeze_*.txt
+
+# Generated audits, snapshots, archives, and scratch output
+output.txt
+TGWUI_snapshot.txt
+extensions/orion_ltm.zip
+user_data/orion_cli.zip
+user_data/orion_cli/orion_cli_snapshot.md
+user_data/orion_cli/orion_cli_snapshot_manifest.txt
+user_data/orion_cli/orion_user_data.md
+*pip_freeze*.txt
+*.bak
+*.zip
+
+# Temporary Git recovery folders
+.git_backup_before_bfg/
+# END ORION PHASE07 PUBLICATION SAFETY
+
+
