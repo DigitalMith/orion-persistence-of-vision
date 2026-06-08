@@ -135,5 +135,9 @@ user_data/orion_cli/orion_user_data.md
 # Temporary Git recovery folders
 .git_backup_before_bfg/
 # END ORION PHASE07 PUBLICATION SAFETY
-
+*.bak_*
+* - Copy.py
+.gitignore.before_core_publish_*
+user_data/orion_cli/__init__.py.before_core_publish_*
+user_data/orion_cli/__init__.py.before_*
 

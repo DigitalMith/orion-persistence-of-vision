@@ -28,7 +28,9 @@ from orion_cli.shared.paths import (
     DEFAULT_CONFIG_PATH,
     SCHEMA_PATH,
     USER_CONFIG_PATH,
+    USER_DATA_DIR,
     CHROMA_DIR,
+    PACKAGE_ROOT,
 )
 from orion_cli.shared.utils import (
     read_yaml,
@@ -47,6 +49,35 @@ class PersonaSettings(BaseModel):
         default=0.5,
         description="How strongly Orion should adhere to persona constraints (0–1).",
     )
+
+
+class ArchivistPoolSettings(BaseModel):
+    window_turns: int = Field(default=20)
+    min_new_turns: int = Field(default=6)
+
+
+class ArchivistWriteSettings(BaseModel):
+    target: str = Field(default="semantic_candidates")  # refers to collections key
+    auto_promote: bool = Field(default=False)
+    promote_min_confidence: float = Field(default=0.85)
+
+
+class ArchivistSettings(BaseModel):
+    enabled: bool = Field(default=False)
+
+    # OSS default: OpenAI-compatible
+    provider: str = Field(default="openai_compat")  # "openai_compat" | "ollama_native"
+
+    base_url: str = Field(default="http://localhost:11434/v1")
+    api_key: str = Field(default="ollama")
+    model: str = Field(default="qwen3:4b")
+
+    temperature: float = Field(default=0.2)
+    max_tokens: int = Field(default=800)
+    timeout_s: int = Field(default=60)
+
+    pool: ArchivistPoolSettings = Field(default_factory=ArchivistPoolSettings)
+    write: ArchivistWriteSettings = Field(default_factory=ArchivistWriteSettings)
 
 
 class LTMSettings(BaseModel):
@@ -74,6 +105,14 @@ class LTMSettings(BaseModel):
         default_factory=dict,
         description="Optional per-source or per-tag boosts.",
     )
+    topk_semantic: int = Field(
+        default=0,
+        description="Max number of semantic memories to recall per query (0 disables).",
+    )
+    semantic_enabled: bool = Field(
+        default=False,
+        description="Enable semantic memory recall layer.",
+    )
 
 
 class DebugSettings(BaseModel):
@@ -84,6 +123,13 @@ class DebugSettings(BaseModel):
     episodic_recall: bool = False
     episodic_store: bool = False
     short_descriptions: bool = True
+
+
+class CollectionsSettings(BaseModel):
+    persona: str = Field(default="persona")
+    episodic: str = Field(default="orion_episodic_ltm")
+    semantic: str = Field(default="orion_semantic_ltm")
+    semantic_candidates: str = Field(default="orion_semantic_candidates")
 
 
 # -------------------------------------------------------------
@@ -122,7 +168,7 @@ class OrionConfig(BaseModel):
     chroma_path: Optional[Path] = Field(
         default=None,
         description="Directory where ChromaDB persistent data is stored. "
-                    "If omitted, CHROMA_DIR from shared.paths is used.",
+        "If omitted, CHROMA_DIR from shared.paths is used.",
     )
 
     embedding_model: str = Field(
@@ -148,6 +194,14 @@ class OrionConfig(BaseModel):
         default_factory=DebugSettings,
         description="Debug verbosity and tracing controls.",
     )
+    collections: CollectionsSettings = Field(
+        default_factory=CollectionsSettings,
+        description="Chroma collection naming.",
+    )
+    archivist: ArchivistSettings = Field(
+        default_factory=ArchivistSettings,
+        description="Optional secondary model for semantic extraction, etc.",
+    )
 
     class Config:
         extra = "ignore"  # Allow unknown keys, ignore them safely.
@@ -156,6 +210,29 @@ class OrionConfig(BaseModel):
 # -------------------------------------------------------------
 # Internal helpers
 # -------------------------------------------------------------
+
+
+def _abs_under_user_data(p: Path) -> Path:
+    # If path is relative, interpret relative to USER_DATA_DIR
+    return (p if p.is_absolute() else (USER_DATA_DIR / p)).resolve()
+
+
+def _abs_orion_path(p: Path) -> Path:
+    """
+    Normalize paths deterministically:
+    - Absolute -> keep
+    - Starts with 'user_data/...' -> resolve relative to TGWUI root
+    - Other relative -> resolve relative to USER_DATA_DIR
+    """
+    if p.is_absolute():
+        return p.resolve()
+
+    parts = p.parts
+    if parts and parts[0].lower() == "user_data":
+        tgwui_root = PACKAGE_ROOT.parent.parent  # .../text-generation-webui
+        return (tgwui_root / p).resolve()
+
+    return (USER_DATA_DIR / p).resolve()
 
 
 def _load_default_config() -> Dict[str, Any]:
@@ -179,21 +256,27 @@ def _load_user_config() -> Dict[str, Any]:
 
 
 def _env_overrides() -> Dict[str, Any]:
-    """
-    Collect ORION_* environment variables.
-
-    Example:
-        ORION_EMBEDDING_DIM=768 -> {"embedding_dim": "768"}
-
-    Values are parsed/coerced later by Pydantic where types are defined.
-    """
-    prefix = "ORION_"
+    prefix = "ORION__"
     out: Dict[str, Any] = {}
+
+    def set_nested(d: Dict[str, Any], keys: list[str], value: Any) -> None:
+        cur = d
+        for k in keys[:-1]:
+            cur = cur.setdefault(k, {})
+        cur[keys[-1]] = value
 
     for key, value in os.environ.items():
         if key.startswith(prefix):
-            field = key[len(prefix):].lower()
+            path = key[len(prefix) :].lower().split("__")
+            set_nested(out, path, value)
+
+    # Back-compat for old style ORION_FOO=bar (top-level)
+    legacy_prefix = "ORION_"
+    for key, value in os.environ.items():
+        if key.startswith(legacy_prefix) and not key.startswith(prefix):
+            field = key[len(legacy_prefix) :].lower()
             out[field] = value
+
     return out
 
 
@@ -279,22 +362,19 @@ def get_active_profile_name(cfg: OrionConfig) -> str:
 
 
 def resolve_profile_paths(cfg: OrionConfig) -> Tuple[Path, Path]:
-    """
-    Resolve identity/persona file paths for the active profile.
-
-    - For `orion_main`, use the canonical shipped files under orion_cli/data.
-    - For any other profile, use: <profiles_root>/<profile>/data/{identity,persona}.yaml
-    """
     profile_name = get_active_profile_name(cfg)
 
     # Default shipped profile
     if profile_name == "orion_main":
-        return cfg.identity_path, cfg.persona_path
+        return _abs_orion_path(Path(cfg.identity_path)), _abs_orion_path(
+            Path(cfg.persona_path)
+        )
 
     # User-defined profile
-    base = cfg.profiles_root / profile_name / "data"
-    identity = base / "identity.yaml"
-    persona = base / "persona.yaml"
+    base = _abs_orion_path(Path(cfg.profiles_root))
+    data_dir = base / profile_name / "data"
+    identity = (data_dir / "identity.yaml").resolve()
+    persona = (data_dir / "persona.yaml").resolve()
     return identity, persona
 
 

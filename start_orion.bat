@@ -5,8 +5,8 @@ REM ============================================================
 REM  Orion Startup Script (UI + OpenAI API enabled)
 REM ============================================================
 
-REM ---- Activate venv ----
-call C:\Orion\text-generation-webui\venv-orion\Scripts\activate.bat
+REM ---- Activate TGWUI installer environment ----
+call C:\Orion\text-generation-webui\installer_files\conda\condabin\conda.bat activate C:\Orion\text-generation-webui\installer_files\env
 
 REM ---- Move into TGWUI directory ----
 cd /d C:\Orion\text-generation-webui

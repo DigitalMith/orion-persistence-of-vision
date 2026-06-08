@@ -1,0 +1,29 @@
+schema_version: 1
+
+tools:
+  paths:
+    argv: ["-m", "orion_cli.cli", "tools", "paths"]
+    confirm: ""
+
+  config:
+    argv: ["-m", "orion_cli.cli", "tools", "config"]
+    confirm: ""
+
+  memory-stats:
+    argv: ["-m", "orion_cli.cli", "memory", "stats"]
+    confirm: ""
+
+  persona-plan-default:
+    argv: ["-m", "orion_cli.cli", "ingest", "persona-default", "--plan"]
+    confirm: ""
+    allow_args: false
+
+  agent-snapshot:
+    argv: ["-m", "orion_cli.cli", "tools", "agent", "snapshot"]
+    confirm: ""
+    allow_args: false
+
+  docs-snapshot:
+    argv: ["-m", "orion_cli.cli", "docs", "snapshot"]
+    confirm: ""
+    allow_args: false
